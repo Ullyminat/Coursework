@@ -18,8 +18,27 @@ import '@xyflow/react/dist/style.css';
 import './CabinetSchema.css';
 import { useReactFlow } from 'reactflow';
 import axios from 'axios';
-import { FaCopy, FaPaste, FaTrash } from "react-icons/fa";
+import {
+  Button,
+  IconButton,
+  Select,
+  MenuItem,
+  Paper,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Divider,
+  Chip,
+  Box,
+  Typography,
+  ToggleButtonGroup,
+  ToggleButton
+} from '@mui/material';
+import { FaCopy, FaPaste, FaTrash, FaUpload, FaSave } from "react-icons/fa";
 import { FaRotateLeft , FaRotateRight } from "react-icons/fa6";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import theme from './theme';
+import SuccessModal from './SuccessModal';
 
 const NODE_TYPES = {
   board: ({ selected, width, height, data }) => (
@@ -140,15 +159,10 @@ const NODE_TYPES = {
         height: height,
         transform: `rotate(${data.rotation}deg)`,
         // borderColor: selected ? '#607d8b' : '#455a64',
-        // Добавлен белый фон для контраста
         backgroundColor: '#fff',
-        // Усиленные параметры линий
         backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><line x1='0' y1='0' x2='16' y2='16' stroke='%2300aaff' stroke-width='2'/></svg>")`,
-        // Фиксированный размер паттерна
         backgroundSize: '16px 16px',
-        // Плотность линий
         backgroundPosition: '0 0',
-        // Граница для четкости
         border: '2px solid rgb(0, 170, 255) '
       }}
     >
@@ -242,6 +256,8 @@ const CabinetSchema = () => {
   const [selectedType, setSelectedType] = useState(null);
   const [copiedNodes, setCopiedNodes] = useState([]);
   const { project } = useReactFlow();
+  const [isModalOpen, setIsModalOpen] = useState(true);
+  
 
   const {
     cabinets,
@@ -250,8 +266,6 @@ const CabinetSchema = () => {
     error,
     fetchCabinets,
     selectCabinet,
-    saveSchema,
-    generateDocument,
   } = useCabinetStore();
 
   // Загрузка кабинетов при монтировании
@@ -295,7 +309,6 @@ const CabinetSchema = () => {
     try {
       const container = document.querySelector('.react-flow__viewport');
       
-      // Фиксированные размеры для сохранения
       const width = 1000;
       const height = 800;
   
@@ -305,7 +318,7 @@ const CabinetSchema = () => {
         useCORS: true,
         logging: true,
         scale: 2,
-        scrollX: -window.scrollX, // Игнорируем текущий скролл
+        scrollX: -window.scrollX,
         scrollY: -window.scrollY,
         windowWidth: width,
         windowHeight: height,
@@ -322,28 +335,13 @@ const CabinetSchema = () => {
       const imageData = canvas.toDataURL('image/png');
       const blob = await fetch(imageData).then(res => res.blob());
       useCabinetStore.getState().saveSchema({ nodes, edges }, blob);
-  
-      alert('Схема сохранена');
+
+      setIsModalOpen(true);
     } catch (error) {
       alert(`Ошибка сохранения: ${error.message}`);
     }
   };
   
-  // Генерация документа
-  const handleGenerateDoc = async () => {
-    try {
-      const blob = await generateDocument(selectedCabinetId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `паспорт_кабинета.docx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      alert(`Ошибка генерации: ${error.message}`);
-    }
-  };
   const importData = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -498,7 +496,7 @@ const CabinetSchema = () => {
         onPaneClick={onPaneClick}
         snapToGrid
         snapGrid={[10, 10]}
-        fitView={false} // Отключаем авто-масштабирование
+        fitView={false}
         minZoom={0.1}
         maxZoom={2}
         // fitViewOptions={{
@@ -514,70 +512,154 @@ const CabinetSchema = () => {
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
         <MiniMap />
         <Controls />
-        <Panel position="top-left" className="elements-panel">
-          <div className="elements-grid">
-            {ELEMENTS.map((item) => (
-              <button
-                key={item.type}
-                onClick={() => setSelectedType(item.type)}
-                className={`element-btn ${selectedType === item.type ? 'active' : ''}`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </Panel>
-        <Panel position="top-right" className="controls-panel">
-  <div className="file-controls">
-    <label className="file-button">
-      <input type="file" onChange={importData} accept=".json" />
-      <span>Загрузить</span>
-    </label>
-    <button className="file-button" onClick={exportData}>
-      <span>Сохранить в файл</span> 
-    </button>
-    <select
-            value={selectedCabinetId || ''}
-            onChange={(e) => selectCabinet(e.target.value)}
-            disabled={isLoading}
+        <Panel position="top-left">
+  <Paper elevation={3} sx={{ p: 2, maxWidth: 320 }}>
+    <ToggleButtonGroup
+      orientation="vertical"
+      value={selectedType}
+      exclusive
+      fullWidth
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: 1
+      }}
+    >
+      {ELEMENTS.map((item) => (
+        <Tooltip key={item.type} title={item.label} arrow>
+          <ToggleButton
+            value={item.type}
+            selected={selectedType === item.type}
+            onClick={() => setSelectedType(item.type)}
+            sx={{
+              height: 60,
+              p: 1,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: '8px!important',
+              '&.Mui-selected': {
+                bgcolor: 'primary.main',
+                color: 'common.white',
+                '&:hover': {
+                  bgcolor: 'primary.dark'
+                }
+              }
+            }}
           >
-            <option value="">Выберите кабинет</option>
-            {cabinets.map((cabinet) => (
-              <option key={cabinet._id} value={cabinet._id}>
-                Кабинет №{cabinet.cabinet}
-              </option>
-            ))}
-          </select>
-    <button className="file-button" onClick={handleSaveToServer} disabled={!selectedCabinetId || isLoading}>
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center' 
+            }}>
+              <Chip 
+                label={item.symbol}
+                size="small" 
+                sx={{
+                  mb: 0.5,
+                  bgcolor: 'transparent',
+                  border: '1px solid',
+                  borderColor: 'inherit',
+                  color: 'inherit'
+                }}
+              />
+              <Typography variant="caption" sx={{ 
+                fontSize: '0.65rem', 
+                lineHeight: 1.1,
+                textAlign: 'center'
+              }}>
+                {item.label}
+              </Typography>
+            </Box>
+          </ToggleButton>
+        </Tooltip>
+      ))}
+    </ToggleButtonGroup>
+  </Paper>
+</Panel>
+  <Panel position="top-right" >
+  <Paper elevation={3} sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+      <Button
+        variant="contained"
+        color="primary"
+        component="label"
+        startIcon={<FaUpload />}
+      >
+        Загрузить
+        <input type="file" hidden onChange={importData} accept=".json" />
+      </Button>
+      
+      <Button
+        variant="outlined"
+        color="primary"
+        startIcon={<FaSave />}
+        onClick={exportData}
+      >
+        Сохранить
+      </Button>
+    </Box>
+
+    <FormControl fullWidth size="small">
+      <InputLabel>Кабинет</InputLabel>
+      <Select
+        value={selectedCabinetId || ''}
+        onChange={(e) => selectCabinet(e.target.value)}
+        disabled={isLoading}
+        label="Кабинет"
+      >
+        <MenuItem value="">Выберите кабинет</MenuItem>
+        {cabinets.map((cabinet) => (
+          <MenuItem key={cabinet._id} value={cabinet._id}>
+            Кабинет №{cabinet.cabinet}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+    <Button
+      variant="contained"
+        color="primary"
+      onClick={handleSaveToServer}
+      disabled={!selectedCabinetId || isLoading}
+      fullWidth
+    >
       {isLoading ? 'Сохранение...' : 'Сохранить на сервере'}
-    </button>
-  </div>
-  
-  <div className="rotation-controls">
-    <button onClick={() => handleRotation('counterclockwise')}>
-      <FaRotateLeft />
-    </button>
-    <button onClick={() => handleRotation('clockwise')}>
-      <FaRotateRight />
-    </button>
-    <button onClick={handleDelete} className="delete-button">
-    <FaTrash />
-    </button>
-    <button 
-      className="file-button" 
-      onClick={handleCopy}
-      disabled={!nodes.some(n => n.selected)}
-    >
-      <FaCopy />
-    </button>
-    <button 
-      className="file-button" 
-      onClick={handlePaste}
-      disabled={copiedNodes.length === 0}
-    >
-      <FaPaste />
-    </button>
-  </div>
+    </Button>
+
+    <Divider sx={{ my: 1 }} />
+
+    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+      <Tooltip title="Повернуть влево">
+        <IconButton onClick={() => handleRotation('counterclockwise')} color="primary">
+          <FaRotateLeft />
+        </IconButton>
+      </Tooltip>
+      
+      <Tooltip title="Повернуть вправо">
+        <IconButton onClick={() => handleRotation('clockwise')} color="primary">
+          <FaRotateRight />
+        </IconButton>
+      </Tooltip>
+      
+      <Tooltip title="Удалить">
+        <IconButton onClick={handleDelete} color="error">
+          <FaTrash />
+        </IconButton>
+      </Tooltip>
+      
+      <Tooltip title="Копировать">
+        <IconButton onClick={handleCopy} color="primary">
+          <FaCopy />
+        </IconButton>
+      </Tooltip>
+      
+      <Tooltip title="Вставить">
+        <IconButton onClick={handlePaste} color="primary">
+          <FaPaste />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  </Paper>
 </Panel>
 
       </ReactFlow>
@@ -586,12 +668,18 @@ const CabinetSchema = () => {
           Ошибка: {error}
         </div>
       )}
+      <SuccessModal 
+  open={isModalOpen}
+  onClose={() => setIsModalOpen(false)}
+/>
     </div>
   );
 };
 
 export default () => (
-  <ReactFlowProvider>
-    <CabinetSchema />
-  </ReactFlowProvider>
+  <ThemeProvider theme={theme}>
+    <ReactFlowProvider>
+      <CabinetSchema />
+    </ReactFlowProvider>
+  </ThemeProvider>
 );

@@ -1,25 +1,43 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import apiClient from '../api/client';
 
 const useAuthStore = create((set) => ({
   isAuthenticated: false,
   user: null,
-  token: null,
-  login: async (email, password) => {
+  isLoadingAuth: true, // Добавляем состояние загрузки
+
+  // Метод для проверки авторизации
+  checkAuth: async () => {
     try {
-      const response = await axios.post('http://localhost:3000/api/login', { email, password }, { withCredentials: true });
-      if (response.status === 200) {
-        set({ isAuthenticated: true, user: response.data.user, token: response.data.token });
-        return response.data;
-      } else {
-        throw new Error('Неверный email или пароль');
-      }
+      const response = await apiClient.get('/me');
+      set({
+        isAuthenticated: true,
+        user: response.data.user,
+        isLoadingAuth: false,
+      });
     } catch (error) {
-      throw error;
+      set({ isAuthenticated: false, user: null, isLoadingAuth: false });
     }
   },
-  logout: () => {
-    set({ isAuthenticated: false, user: null, token: null });
+
+  login: async (email, password) => {
+    try {
+      const response = await apiClient.post('/login', { email, password });
+      set({ 
+        isAuthenticated: true, 
+        user: response.data.user,
+      });
+    } catch (error) {
+      throw error.response?.data?.error || 'Ошибка входа';
+    }
+  },
+
+  logout: async () => {
+    try {
+      await apiClient.post('/logout');
+    } finally {
+      set({ isAuthenticated: false, user: null });
+    }
   },
 }));
 
