@@ -15,30 +15,21 @@ import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
 import useCabinetStore from '../store/store';
 import '@xyflow/react/dist/style.css';
-import './CabinetSchema.css';
+import '../styles/CabinetSchema.css';
 import { useReactFlow } from 'reactflow';
-import axios from 'axios';
-import {
-  Button,
-  IconButton,
-  Select,
-  MenuItem,
-  Paper,
-  FormControl,
-  InputLabel,
-  Tooltip,
-  Divider,
-  Chip,
-  Box,
-  Typography,
-  ToggleButtonGroup,
-  ToggleButton
-} from '@mui/material';
-import { FaCopy, FaPaste, FaTrash, FaUpload, FaSave } from "react-icons/fa";
-import { FaRotateLeft , FaRotateRight } from "react-icons/fa6";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { Button, IconButton, Select, MenuItem, Paper, FormControl, InputLabel, Tooltip, Divider, Chip, Box, Typography, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
 import SuccessModal from './SuccessModal';
+import { useNavigate } from 'react-router-dom';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import RotateLeftIcon from '@mui/icons-material/RotateLeft';
+import RotateRightIcon from '@mui/icons-material/RotateRight';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import SaveIcon from '@mui/icons-material/Save';
 
 const NODE_TYPES = {
   board: ({ selected, width, height, data }) => (
@@ -256,8 +247,8 @@ const CabinetSchema = () => {
   const [selectedType, setSelectedType] = useState(null);
   const [copiedNodes, setCopiedNodes] = useState([]);
   const { project } = useReactFlow();
-  const [isModalOpen, setIsModalOpen] = useState(true);
-  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const {
     cabinets,
@@ -340,6 +331,10 @@ const CabinetSchema = () => {
     } catch (error) {
       alert(`Ошибка сохранения: ${error.message}`);
     }
+  };
+
+  const handleClick = () => {
+    navigate('/');
   };
   
   const importData = async (e) => {
@@ -578,12 +573,21 @@ const CabinetSchema = () => {
 </Panel>
   <Panel position="top-right" >
   <Paper elevation={3} sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={handleClick}
+      fullWidth
+      startIcon={<ExitToAppIcon />}
+    >
+      Выйти из редактора
+    </Button>
     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
       <Button
         variant="contained"
         color="primary"
         component="label"
-        startIcon={<FaUpload />}
+        startIcon={<FileUploadIcon />}
       >
         Загрузить
         <input type="file" hidden onChange={importData} accept=".json" />
@@ -592,7 +596,7 @@ const CabinetSchema = () => {
       <Button
         variant="outlined"
         color="primary"
-        startIcon={<FaSave />}
+        startIcon={<SaveIcon />}
         onClick={exportData}
       >
         Сохранить
@@ -631,31 +635,31 @@ const CabinetSchema = () => {
     <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
       <Tooltip title="Повернуть влево">
         <IconButton onClick={() => handleRotation('counterclockwise')} color="primary">
-          <FaRotateLeft />
+          <RotateLeftIcon />
         </IconButton>
       </Tooltip>
       
       <Tooltip title="Повернуть вправо">
         <IconButton onClick={() => handleRotation('clockwise')} color="primary">
-          <FaRotateRight />
+          <RotateRightIcon />
         </IconButton>
       </Tooltip>
       
       <Tooltip title="Удалить">
         <IconButton onClick={handleDelete} color="error">
-          <FaTrash />
+          <DeleteForeverIcon/>
         </IconButton>
       </Tooltip>
       
       <Tooltip title="Копировать">
         <IconButton onClick={handleCopy} color="primary">
-          <FaCopy />
+          <ContentCopyIcon />
         </IconButton>
       </Tooltip>
       
       <Tooltip title="Вставить">
         <IconButton onClick={handlePaste} color="primary">
-          <FaPaste />
+          <ContentPasteIcon />
         </IconButton>
       </Tooltip>
     </Box>

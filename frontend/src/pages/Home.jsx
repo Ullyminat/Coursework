@@ -10,9 +10,10 @@ import {
   Paper,
   Divider
 } from '@mui/material';
-import { ThemeProvider } from '@mui/material/styles'; // Импортируем ThemeProvider
+import { ThemeProvider } from '@mui/material/styles';
 import { CheckCircle, Edit, Description } from '@mui/icons-material';
-import theme from '../components/theme'; // Импортируем тему
+import theme from '../components/theme';
+import Header from '../components/Header';
 
 const steps = [
   {
@@ -33,7 +34,7 @@ const steps = [
     title: 'Паспорт кабинета готов',
     description: 'Скачайте готовый документ (ОБЯЗАТЕЛЬНО проверьте документ)',
     icon: <CheckCircle />,
-    action: 'Скачать',
+    action: 'Скачать WORD',
     link: ''
   }
 ];
@@ -41,11 +42,12 @@ const steps = [
 const Home = () => {
   return (
     <ThemeProvider theme={theme}>
+      <Header/>
       <Container component="main" maxWidth="md">
         <CssBaseline />
         <Box
           sx={{
-            marginTop: 8,
+            marginTop: 5,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -78,18 +80,18 @@ const Home = () => {
                     zIndex: 1
                   }}>
                     <Avatar sx={{ 
-                      bgcolor: index === 0 ? 'primary.main' : 'action.disabledBackground',
-                      color: index === 0 ? 'primary.contrastText' : 'text.secondary',
+                      bgcolor: 'primary.main',
+                      color: 'primary.contrastText',
                       width: 48,
                       height: 48
                     }}>
-                      {index === 0 ? 1 : index === 1 ? 2 : 3}
+                      {index + 1}
                     </Avatar>
                     
                     <Box sx={{ flexGrow: 1, textAlign: 'left' }}>
                       <Typography variant="h6" sx={{ 
                         fontWeight: 600,
-                        color: index === 0 ? 'primary.main' : 'text.primary'
+                        color: 'primary.main'
                       }}>
                         {step.title}
                       </Typography>
@@ -101,19 +103,14 @@ const Home = () => {
                       </Typography>
                       
                       <Button
-                        component={index === 0 ? Link : 'button'}
+                        component={step.link ? Link : 'button'}
                         to={step.link}
-                        variant={index === 0 ? 'contained' : 'outlined'}
+                        variant="contained"
                         color="primary"
                         size="medium"
-                        disabled={index !== 0}
                         sx={{ 
                           mt: 2,
                           borderRadius: '8px',
-                          '&:disabled': {
-                            borderColor: 'action.disabled',
-                            color: 'text.disabled'
-                          }
                         }}
                         startIcon={step.icon}
                       >
@@ -126,9 +123,8 @@ const Home = () => {
                     <Divider sx={{ 
                       position: 'absolute',
                       left: 24,
-                      top: 48,
-                      bottom: -32,
-                      height: 'calc(100% - 64px)',
+                      top: '60px',
+                      bottom: '20px',
                       borderLeft: '2px dashed',
                       borderColor: 'divider',
                       zIndex: 0

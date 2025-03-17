@@ -4,7 +4,7 @@ import apiClient from '../api/client';
 const useAuthStore = create((set) => ({
   isAuthenticated: false,
   user: null,
-  isLoadingAuth: true, // Добавляем состояние загрузки
+  isLoadingAuth: true,
 
   // Метод для проверки авторизации
   checkAuth: async () => {
