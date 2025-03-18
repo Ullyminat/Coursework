@@ -2,6 +2,8 @@ import User from "../models/user.mjs";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import { configDotenv } from 'dotenv';
+import UMK from "../models/umk.mjs";
+import Spec from "../models/spec.mjs";
 
 configDotenv();
 export default class test{
@@ -97,7 +99,7 @@ export default class test{
         try {
           const user = await User.findById(req.user._id).select('-password');
           res.json(user);
-        } catch (err) {
+        } catch (error) {
             console.log(error);
             return res.status(500).json({ error: error.message });
         }
@@ -105,17 +107,54 @@ export default class test{
 
     static async getCabinets(req, res) {
         try {
-          console.log('Fetching cabinets for user:', req.user._id); // Логируем ID пользователя
+          console.log('Fetching cabinets for user:', req.user._id);
           const user = await User.findById(req.user._id).populate('cabinets');
           if (!user) {
-            console.log('User not found'); // Логируем, если пользователь не найден
+            console.log('User not found');
             return res.status(404).json({ error: 'User not found' });
           }
-          console.log('User cabinets:', user.cabinets); // Логируем кабинеты пользователя
+          console.log('User cabinets:', user.cabinets);
           res.json(user.cabinets);
         } catch (error) {
-          console.error('Error fetching cabinets:', error); // Логируем ошибку
-          res.status(500).json({ error: 'Failed to fetch cabinets' });
+            console.log(error);
+            return res.status(500).json({ error: error.message });
         }
       }
+
+    static async getUMK(req, res) {
+        try {
+          const umk = await UMK.find();
+          console.log(umk);
+          res.json(umk);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: error.message });
+        }
+      }
+
+      static async getSpec(req, res) {
+        try {
+          const spec = await Spec.find();
+          console.log(spec);
+          res.json(spec);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: error.message });
+        }
+      }
+
+      static async getSchema(req, res) {
+        try {
+          const user = await User.findById(req.user._id).populate('schemas');
+          if (!user) {
+            console.log('User not found');
+            return res.status(404).json({ error: 'User not found' });
+          }
+          res.json(user.schemas);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: error.message });
+        }
+      }
+
 }

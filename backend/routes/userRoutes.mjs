@@ -9,5 +9,8 @@ userrouter.post('/login', UserController.login);
 userrouter.post('/logout', authToken, UserController.logout);
 userrouter.get('/me', authToken, UserController.Me);
 userrouter.get('/me/cabinets', authToken, UserController.getCabinets);
+userrouter.get('/me/schemas', authToken, UserController.getSchema);
+userrouter.get('/me/specs', authToken, UserController.getSpec);
+userrouter.get('/me/umk', authToken, UserController.getUMK);
 
 export default userrouter;

@@ -7,6 +7,7 @@ import useAuthStore from './store/authStore';
 import { useEffect } from 'react';
 import Home from './pages/Home';
 import { Navigate } from 'react-router-dom';
+import Gendocx from './pages/Gendocx';
 
 function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
@@ -24,6 +25,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Home />} />
           <Route path="/editor" element={<CabinetSchema />} />
+          <Route path="/gendocx" element={<Gendocx />} />
         </Route>
 
         {/* Fallback */}

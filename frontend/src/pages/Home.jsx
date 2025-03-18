@@ -28,7 +28,7 @@ const steps = [
     description: 'Сформируйте документ',
     icon: <Description />,
     action: 'Сгенерировать документ',
-    link: ''
+    link: '/gendocx'
   },
   {
     title: 'Паспорт кабинета готов',

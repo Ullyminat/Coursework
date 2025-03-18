@@ -4,15 +4,51 @@ import apiClient from '../api/client';
 const useCabinetStore = create((set, get) => ({
   cabinets: [],
   selectedCabinetId: null,
-  schemas: [],
+  schemas: [],       // Схемы пользователя
+  umk: [],           // Учебно-методические комплексы
+  specs: [],         // Спецификации
   isLoading: false,
   error: null,
 
+  // Загрузка кабинетов пользователя
   fetchCabinets: async () => {
     set({ isLoading: true, error: null });
     try {
       const response = await apiClient.get('/me/cabinets');
       set({ cabinets: response.data, isLoading: false });
+    } catch (error) {
+      set({ error: error.response?.data?.error || error.message, isLoading: false });
+    }
+  },
+
+  // Загрузка UMK пользователя
+  fetchUMK: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.get('/me/umk');
+      set({ umk: response.data || [], isLoading: false });
+    } catch (error) {
+      set({ umk: [], error: error.response?.data?.error || error.message, isLoading: false });
+    }
+  },
+
+  // Загрузка спецификаций
+  fetchSpecs: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.get('/me/specs');
+      set({ specs: response.data || [], isLoading: false });
+    } catch (error) {
+      set({ error: error.response?.data?.error || error.message, isLoading: false });
+    }
+  },
+
+  // Загрузка схем пользователя
+  fetchUserSchemas: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.get('/me/schemas');
+      set({ schemas: response.data || [], isLoading: false });
     } catch (error) {
       set({ error: error.response?.data?.error || error.message, isLoading: false });
     }
@@ -37,6 +73,8 @@ const useCabinetStore = create((set, get) => ({
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
+      // Обновляем список схем после сохранения
+      await get().fetchUserSchemas();
       return response.data;
     } catch (error) {
       throw error.response?.data?.error || error.message;
@@ -45,14 +83,18 @@ const useCabinetStore = create((set, get) => ({
     }
   },
 
-  generateDocument: async (schemaId) => {
+  generateDocument: async ({ cabinetId, umkIds, specIds, schemaId }) => {
     try {
-      const response = await apiClient.post('/gendocx', { schemaId }, {
-        responseType: 'blob'
-      });
+      const response = await apiClient.post(
+        '/gendocx', 
+        { cabinetId, umkIds, specIds, schemaId },
+        { responseType: 'blob' }
+      );
       return response.data;
     } catch (error) {
-      throw error.response?.data?.error || error.message;
+      const errorMessage = error.response?.data?.error || error.message;
+      set({ error: errorMessage });
+      throw errorMessage;
     }
   },
 }));
