@@ -12,5 +12,6 @@ userrouter.get('/me/cabinets', authToken, UserController.getCabinets);
 userrouter.get('/me/schemas', authToken, UserController.getSchema);
 userrouter.get('/me/specs', authToken, UserController.getSpec);
 userrouter.get('/me/umk', authToken, UserController.getUMK);
+userrouter.get('/me/pasports', authToken, UserController.getPasport);
 
 export default userrouter;

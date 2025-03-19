@@ -7,6 +7,7 @@ const useCabinetStore = create((set, get) => ({
   schemas: [],       // Схемы пользователя
   umk: [],           // Учебно-методические комплексы
   specs: [],         // Спецификации
+  pasports: [],      // Добавляем новое поле для паспортов
   isLoading: false,
   error: null,
 
@@ -18,6 +19,21 @@ const useCabinetStore = create((set, get) => ({
       set({ cabinets: response.data, isLoading: false });
     } catch (error) {
       set({ error: error.response?.data?.error || error.message, isLoading: false });
+    }
+  },
+
+  // Загрузка паспортов пользователя
+  fetchPasports: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.get('/me/pasports');
+      set({ pasports: response.data || [], isLoading: false });
+    } catch (error) {
+      set({ 
+        error: error.response?.data?.error || error.message, 
+        pasports: [],
+        isLoading: false 
+      });
     }
   },
 

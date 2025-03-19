@@ -7,5 +7,6 @@ const docxrouter = express.Router();
 
 docxrouter.post('/gendocx', authToken, upload.single('file'),docController.generateDoc);
 docxrouter.post('/save', authToken, upload.single("image"),docController.saveSchema);
+docxrouter.get('/:pasportId/download', authToken, docController.downloadPasport);
 
 export default docxrouter;

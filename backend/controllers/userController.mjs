@@ -157,4 +157,17 @@ export default class test{
         }
       }
 
+      static async getPasport(req, res) {
+        try {
+          const user = await User.findById(req.user._id).populate('pasports');
+          if (!user) {
+            console.log('User not found');
+            return res.status(404).json({ error: 'User not found' });
+          }
+          res.json(user.pasports);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: error.message });
+        }
+      }
 }

@@ -131,6 +131,12 @@ export default class DocController {
         file: buf,
       });
 
+      await User.findByIdAndUpdate(
+        userId,
+        { $push: { pasports: pasport._id } },
+        { new: true, useFindAndModify: false }
+      );
+
       const fileName = `cabinet-${cabinet.cabinet}-pasport-${Date.now()}.docx`;
       const filePath = path.resolve(`media/doc/${fileName}`);
       fs.writeFileSync(filePath, buf);
@@ -177,6 +183,39 @@ export default class DocController {
     } catch (error) {
       console.error("Schema saving error:", error);
       res.status(500).json({ error: "Schema saving failed", details: error.message });
+    }
+  }
+
+  static async downloadPasport(req, res) {
+    try {
+      const { pasportId } = req.params;
+      const userId = req.user._id;
+  
+      if (!mongoose.Types.ObjectId.isValid(pasportId)) {
+        return res.status(400).json({ error: "Неверный ID паспорта" });
+      }
+  
+      const pasport = await Pasport.findById(pasportId);
+      if (!pasport) {
+        return res.status(404).json({ error: "Паспорт не найден" });
+      }
+  
+      const filePath = path.resolve('media/doc', pasport.file);
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: "Файл не найден" });
+      }
+  
+      // Отправка файла
+      res.setHeader('Content-Disposition', `attachment; filename="${pasport.file}"`);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.sendFile(filePath);
+  
+    } catch (error) {
+      console.error("Ошибка загрузки:", error);
+      res.status(500).json({ 
+        error: "Ошибка при скачивании паспорта",
+        details: error.message 
+      });
     }
   }
 }

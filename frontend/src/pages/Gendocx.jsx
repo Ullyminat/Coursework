@@ -83,9 +83,18 @@ const Gendocx = () => {
       <Header />
     <Container component="main" maxWidth="md">
       <Paper elevation={3} sx={{ p: 4, borderRadius: '16px', mt: 5 }}>
-      <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-            Генератор паспорта кабинета
+      <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center'
+          }}
+        >
+        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+          Генератор паспорта кабинета
         </Typography>
+          </Box>
 
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
