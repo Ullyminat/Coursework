@@ -5,6 +5,8 @@ import cors from 'cors'
 import docxrouter from './routes/docRoutes.mjs'
 import userrouter from './routes/userRoutes.mjs'
 import cookieParser from 'cookie-parser'
+import roleCheck from './middleware/roleCheck.mjs'
+import adminrouter from './routes/adminRoutes.mjs'
 
 configDotenv();
 
@@ -24,5 +26,6 @@ app.use(cors({
 
 app.use('/api', docxrouter);
 app.use('/api', userrouter);
+app.use('/api', roleCheck('admin'), adminrouter);
 
 app.listen(process.env.PORT,(err)=> err ? console.log(err) : console.log(`http://localhost:${process.env.PORT}`));

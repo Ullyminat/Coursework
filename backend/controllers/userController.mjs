@@ -6,27 +6,7 @@ import UMK from "../models/umk.mjs";
 import Spec from "../models/spec.mjs";
 
 configDotenv();
-export default class test{
-    static async create(req,res){
-        try{
-            const {name,surname,patronymic,email,password,cabinets} = req.body;
-            const hashed = await bcrypt.hash(password,5);
-            const user = new User({
-                name,
-                surname,
-                patronymic,
-                email,
-                password:hashed,
-                cabinets
-            });
-            await user.save();
-            res.status(201).json({msg:'Создан'});
-        } catch (error) {
-            console.log(error)
-            return res.status(500).json({ error: error.message });
-        }
-    }
-
+export default class UserController{
     static async login(req, res) {
         try {
             const { email, password } = req.body;
