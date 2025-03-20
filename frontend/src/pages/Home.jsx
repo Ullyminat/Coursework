@@ -35,7 +35,7 @@ const steps = [
     description: 'Скачайте готовый документ (ОБЯЗАТЕЛЬНО проверьте документ)',
     icon: <CheckCircle />,
     action: 'Скачать WORD',
-    link: ''
+    link: '/profile'
   }
 ];
 

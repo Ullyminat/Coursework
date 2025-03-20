@@ -22,14 +22,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
 import SuccessModal from './SuccessModal';
 import { useNavigate } from 'react-router-dom';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import RotateLeftIcon from '@mui/icons-material/RotateLeft';
-import RotateRightIcon from '@mui/icons-material/RotateRight';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-import SaveIcon from '@mui/icons-material/Save';
+import { ExitToApp as ExitToAppIcon, RotateLeft as RotateLeftIcon, RotateRight as RotateRightIcon, ContentCopy as ContentCopyIcon, ContentPaste as ContentPasteIcon, DeleteForever as DeleteForeverIcon, FileUpload as FileUploadIcon, Save as SaveIcon, Download as DownloadIcon, Description as DocumentIcon} from '@mui/icons-material';
 
 const NODE_TYPES = {
   board: ({ selected, width, height, data }) => (

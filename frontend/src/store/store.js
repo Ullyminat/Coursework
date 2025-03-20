@@ -10,6 +10,23 @@ const useCabinetStore = create((set, get) => ({
   pasports: [],      // Добавляем новое поле для паспортов
   isLoading: false,
   error: null,
+  currentUser: null,
+  userLoading: false,
+  userError: null,
+
+  // Получение данных текущего пользователя
+  fetchCurrentUser: async () => {
+    set({ userLoading: true, userError: null });
+    try {
+      const response = await apiClient.get('/me');
+      set({ 
+        currentUser: response.data,
+        userLoading: false 
+      });
+    } catch (error) {
+      set({ userError: error.response?.data?.error || error.message, userLoading: false });
+    }
+  },
 
   // Загрузка кабинетов пользователя
   fetchCabinets: async () => {
@@ -58,6 +75,40 @@ const useCabinetStore = create((set, get) => ({
       set({ error: error.response?.data?.error || error.message, isLoading: false });
     }
   },
+
+    // Cкачивания паспорта
+    downloadPasport: async (pasportId) => {
+      set({ isLoading: true, error: null });
+      try {
+        const response = await apiClient.get(`/${pasportId}/download`, {
+          responseType: 'blob'
+        });
+  
+        // Извлекаем имя файла из заголовков
+        const contentDisposition = response.headers['content-disposition'];
+        const fileNameMatch = contentDisposition?.match(/filename="(.+)"/);
+        const fileName = fileNameMatch?.[1] || `pasport_${pasportId}.docx`;
+  
+        // Создаем временную ссылку для скачивания
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        
+        // Чистим ресурсы
+        link.parentNode.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        set({ isLoading: false });
+      } catch (error) {
+        const errorMessage = error.response?.data?.error || error.message;
+        set({ error: errorMessage, isLoading: false });
+        throw errorMessage;
+      }
+    },
+  
 
   // Загрузка схем пользователя
   fetchUserSchemas: async () => {

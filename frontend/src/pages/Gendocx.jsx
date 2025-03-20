@@ -19,6 +19,7 @@ import {
 import useCabinetStore from '../store/store';
 import theme from '../components/theme';
 import Header from '../components/Header';
+import { Description } from '@mui/icons-material';
 
 const Gendocx = () => {
   const {
@@ -197,7 +198,7 @@ const Gendocx = () => {
           fullWidth
           onClick={handleGenerate}
           disabled={!isFormValid() || isLoading}
-          startIcon={isLoading ? <CircularProgress size={24} /> : null}
+          startIcon={<Description />}
         >
           Сгенерировать документ
         </Button>
