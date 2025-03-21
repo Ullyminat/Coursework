@@ -28,6 +28,48 @@ const useCabinetStore = create((set, get) => ({
     }
   },
 
+  fetchUsers: async (page = 1, limit = 10) => {
+    set({ usersLoading: true, usersError: null });
+    try {
+      const response = await apiClient.get(`/user?page=${page}&limit=${limit}`);
+      set({ 
+        users: response.data.users,
+        totalUsers: response.data.total,
+        usersLoading: false 
+      });
+    } catch (error) {
+      set({ 
+        usersError: error.response?.data?.error || error.message, 
+        usersLoading: false 
+      });
+    }
+  },
+
+  changeUserRole: async (userId, newRole) => {
+    try {
+      await apiClient.put(`/user/chrole/${userId}`, { role: newRole });
+      set(state => ({
+        users: state.users.map(user => 
+          user._id === userId ? { ...user, role: newRole } : user
+        )
+      }));
+    } catch (error) {
+      throw error.response?.data?.error || error.message;
+    }
+  },
+
+  deleteUser: async (userId) => {
+    try {
+      await apiClient.delete(`/user/${userId}`);
+      set(state => ({
+        users: state.users.filter(user => user._id !== userId),
+        totalUsers: state.totalUsers - 1
+      }));
+    } catch (error) {
+      throw error.response?.data?.error || error.message;
+    }
+  },
+
   // Загрузка кабинетов пользователя
   fetchCabinets: async () => {
     set({ isLoading: true, error: null });

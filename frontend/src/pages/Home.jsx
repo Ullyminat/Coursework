@@ -43,7 +43,7 @@ const Home = () => {
   return (
     <ThemeProvider theme={theme}>
       <Header/>
-      <Container component="main" maxWidth="md">
+      <Container component="main" maxWidth="md" >
         <CssBaseline />
         <Box
           sx={{

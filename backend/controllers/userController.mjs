@@ -22,6 +22,7 @@ export default class UserController{
     
             const payload = {
                 _id: user._id,
+                role: user.role,
                 email: user.email,
             };
             const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '10h' });
@@ -29,9 +30,8 @@ export default class UserController{
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'none',
+                sameSite: 'lax',
                 maxAge: 86400000,
-                domain: 'localhost'
               });
     
             return res.status(200).json({ user: { telephone: user.telephone, _id: user._id }, token });

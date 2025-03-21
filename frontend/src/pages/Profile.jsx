@@ -49,14 +49,14 @@ const Profile = () => {
   return (
     <ThemeProvider theme={theme}>
       <Header />
-      <Container component="main" maxWidth="md" sx={{ py: 4 }}>
-        <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
+      <Container component="main" maxWidth="md" sx={{ py: 4} }>
+        <Paper elevation={3} sx={{ p: 4, borderRadius: '16px', backgroundColor: 'background.paper'}}>
           {/* Секция профиля */}
           <Stack direction="row" spacing={3} alignItems="center" sx={{ mb: 4 }}>
             <Avatar sx={{ 
               width: 80, 
               height: 80,
-              bgcolor: 'primary.secondary',
+              bgcolor: 'primary.main',
               '& .MuiSvgIcon-root': { fontSize: 40 }
             }}>
             </Avatar>

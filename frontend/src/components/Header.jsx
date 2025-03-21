@@ -78,6 +78,23 @@ const Header = () => {
             >
               Профиль
             </Button>
+            
+            <Button
+              component={Link}
+              to="/admin/users"
+              sx={{
+                color: 'white',
+                fontWeight: 600,
+                textTransform: 'none',
+                fontSize: 16,
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.15)'
+                }
+              }}
+            >
+              Админ-панель
+            </Button>
+
           </Box>
         </Box>
 

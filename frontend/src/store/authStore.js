@@ -12,7 +12,7 @@ const useAuthStore = create((set) => ({
       const response = await apiClient.get('/me');
       set({
         isAuthenticated: true,
-        user: response.data.user,
+        user: response.data, 
         isLoadingAuth: false,
       });
     } catch (error) {

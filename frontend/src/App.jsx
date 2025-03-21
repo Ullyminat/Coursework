@@ -9,6 +9,8 @@ import Home from './pages/Home';
 import { Navigate } from 'react-router-dom';
 import Gendocx from './pages/Gendocx';
 import Profile from './pages/Profile';
+import AdminRoute from './components/AdminRoute';
+import AdminPanel from './pages/AdminPanel';
 
 function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
@@ -28,6 +30,10 @@ function App() {
           <Route path="/editor" element={<CabinetSchema />} />
           <Route path="/gendocx" element={<Gendocx />} />
           <Route path="/profile" element={<Profile />} />
+        </Route>
+
+        <Route element={<AdminRoute />}>
+          <Route path="/admin/users" element={<AdminPanel />} />
         </Route>
 
         {/* Fallback */}
