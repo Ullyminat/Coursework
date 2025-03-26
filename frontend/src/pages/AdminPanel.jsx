@@ -26,7 +26,7 @@ import theme from '../components/theme';
 
 const AdminPanel = () => {
   const {
-    users = [], // Добавляем значение по умолчанию
+    users = [],
     totalUsers = 0,
     usersLoading,
     usersError,
@@ -66,10 +66,19 @@ const AdminPanel = () => {
     <ThemeProvider theme={theme}>
       <Header />
       <Container component="main" maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-        <Paper elevation={3} sx={{ p: 3, borderRadius: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
-            Управление пользователями
-          </Typography>
+        <Paper elevation={3} sx={{ p: 4, borderRadius: '16px', backgroundColor: 'background.paper'}}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center'
+          }}
+        >
+        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+              Управление пользователями
+            </Typography>
+        </Box>
 
           {usersError && (
             <Alert severity="error" sx={{ mb: 3 }}>
@@ -94,7 +103,7 @@ const AdminPanel = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {users?.length > 0 ? ( // Добавляем проверку на наличие данных
+                    {users?.length > 0 ? (
                       users.map((user) => (
                         <TableRow key={user._id}>
                           <TableCell>{`${user.surname} ${user.name} ${user.patronymic}`}</TableCell>

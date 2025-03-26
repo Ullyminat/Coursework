@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import theme from './theme';
 
 const Header = () => {
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, logout, user } = useAuthStore();
 
   return (
     <AppBar 
@@ -28,23 +28,22 @@ const Header = () => {
           px: 3
         }}
       >
-
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              component={Link}
-              to="/"
-              sx={{
-                color: 'white',
-                fontWeight: 600,
-                textTransform: 'none',
-                fontSize: 16,
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.15)'
-                }
-              }}
-            >
-              Создание паспорта
-            </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            component={Link}
+            to="/"
+            sx={{
+              color: 'white',
+              fontWeight: 600,
+              textTransform: 'none',
+              fontSize: 16,
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.15)'
+              }
+            }}
+          >
+            Создание паспорта
+          </Button>
 
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
@@ -79,38 +78,42 @@ const Header = () => {
               Профиль
             </Button>
             
-            <Button
-              component={Link}
-              to="/admin/users"
-              sx={{
-                color: 'white',
-                fontWeight: 600,
-                textTransform: 'none',
-                fontSize: 16,
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.15)'
-                }
-              }}
-            >
-              Админ-панель
-            </Button>
-
+            {/* Условный рендеринг для админ-панели */}
+            {user?.role === 'admin' && (
+              <Button
+                component={Link}
+                to="/admin/users"
+                sx={{
+                  color: 'white',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: 16,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.15)'
+                  }
+                }}
+              >
+                Админ-панель
+              </Button>
+            )}
           </Box>
         </Box>
 
         {/* Кнопка выхода */}
-        <IconButton
-          onClick={logout}
-          sx={{
-            color: 'white',
-            padding: 1.5,
-            '&:hover': {
-              backgroundColor: theme.palette.primary.dark
-            }
-          }}
-        >
-          <ExitToAppIcon fontSize="medium" />
-        </IconButton>
+        {isAuthenticated && (
+          <IconButton
+            onClick={logout}
+            sx={{
+              color: 'white',
+              padding: 1.5,
+              '&:hover': {
+                backgroundColor: theme.palette.primary.dark
+              }
+            }}
+          >
+            <ExitToAppIcon fontSize="medium" />
+          </IconButton>
+        )}
       </Toolbar>
     </AppBar>
   );
