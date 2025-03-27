@@ -240,7 +240,7 @@ const CabinetSchema = () => {
   const [selectedType, setSelectedType] = useState(null);
   const [copiedNodes, setCopiedNodes] = useState([]);
   const { project } = useReactFlow();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(true);
   const navigate = useNavigate();
 
   const {

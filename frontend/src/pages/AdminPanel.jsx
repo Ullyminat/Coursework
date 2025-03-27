@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ThemeProvider,
   Container,
@@ -23,6 +23,8 @@ import { Delete as DeleteIcon } from '@mui/icons-material';
 import useCabinetStore from '../store/store';
 import Header from '../components/Header';
 import theme from '../components/theme';
+import DeleteModal from '../components/DeleteModal';
+import CreateUserForm from '../components/CreateUserForm';
 
 const AdminPanel = () => {
   const {
@@ -30,17 +32,29 @@ const AdminPanel = () => {
     totalUsers = 0,
     usersLoading,
     usersError,
+    totalPages = 1,
+    currentPage = 1,
     fetchUsers,
     changeUserRole,
     deleteUser
   } = useCabinetStore();
 
-  const [page, setPage] = useState(1);
-  const limit = 10;
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const limit = 2;
 
   useEffect(() => {
-    fetchUsers(page, limit);
-  }, [page]);
+    fetchUsers(currentPage, limit);
+  }, [currentPage, fetchUsers]);
+
+  const handleUserCreated = () => {
+    fetchUsers(currentPage, limit);
+  };
+
+  const handlePageChange = (_, value) => {
+    fetchUsers(value, limit);
+  };
 
   const handleRoleChange = async (userId, newRole) => {
     try {
@@ -51,34 +65,49 @@ const AdminPanel = () => {
     }
   };
 
-  const handleDelete = async (userId) => {
-    if (window.confirm('Вы уверены, что хотите удалить пользователя?')) {
-      try {
-        await deleteUser(userId);
-      } catch (error) {
-        console.error('Ошибка при удалении:', error);
-        alert('Не удалось удалить пользователя');
+  const handleDeleteClick = (user) => {
+    setSelectedUser(user);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      if (selectedUser) {
+        await deleteUser(selectedUser._id);
+        fetchUsers(currentPage, limit);
       }
+    } catch (error) {
+      console.error('Ошибка при удалении:', error);
+      alert('Не удалось удалить пользователя');
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalOpen(false);
+      setSelectedUser(null);
     }
   };
 
   return (
     <ThemeProvider theme={theme}>
       <Header />
+      
+      <DeleteModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        userName={selectedUser ? `${selectedUser.surname} ${selectedUser.name}` : ''}
+        isLoading={isDeleting}
+      />
+
       <Container component="main" maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+        <CreateUserForm onUserCreated={handleUserCreated} />
+        
         <Paper elevation={3} sx={{ p: 4, borderRadius: '16px', backgroundColor: 'background.paper'}}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center'
-          }}
-        >
-        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+            <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
               Управление пользователями
             </Typography>
-        </Box>
+          </Box>
 
           {usersError && (
             <Alert severity="error" sx={{ mb: 3 }}>
@@ -120,8 +149,9 @@ const AdminPanel = () => {
                           </TableCell>
                           <TableCell>
                             <IconButton 
-                              onClick={() => handleDelete(user._id)}
+                              onClick={() => handleDeleteClick(user)}
                               color="error"
+                              disabled={isDeleting}
                             >
                               <DeleteIcon />
                             </IconButton>
@@ -142,10 +172,12 @@ const AdminPanel = () => {
               {totalUsers > limit && (
                 <Box display="flex" justifyContent="center" mt={3}>
                   <Pagination
-                    count={Math.ceil(totalUsers / limit)}
-                    page={page}
-                    onChange={(_, value) => setPage(value)}
+                    count={totalPages}
+                    page={currentPage}
+                    onChange={handlePageChange}
                     color="primary"
+                    showFirstButton
+                    showLastButton
                   />
                 </Box>
               )}

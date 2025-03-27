@@ -13,6 +13,30 @@ const useCabinetStore = create((set, get) => ({
   currentUser: null,
   userLoading: false,
   userError: null,
+  allCabinets: [],
+
+  createUser: async (userData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.post('/user', userData);
+      
+      const { users, totalUsers } = get();
+      set({
+        users: [...users, response.data],
+        totalUsers: totalUsers + 1,
+        isLoading: false
+      });
+      
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message;
+      set({ 
+        error: errorMessage, 
+        isLoading: false 
+      });
+      throw errorMessage;
+    }
+  },
 
   // Получение данных текущего пользователя
   fetchCurrentUser: async () => {
@@ -28,13 +52,33 @@ const useCabinetStore = create((set, get) => ({
     }
   },
 
-  fetchUsers: async (page = 1, limit = 10) => {
+    // Получение всех кабинетов (админ)
+    fetchAllCabinets: async () => {
+      set({ cabinetsLoading: true, cabinetsError: null });
+      try {
+        const response = await apiClient.get('/cabinets');
+        set({ 
+          allCabinets: response.data,
+          cabinetsLoading: false 
+        });
+      } catch (error) {
+        set({ 
+          cabinetsError: error.response?.data?.error || error.message, 
+          cabinetsLoading: false 
+        });
+        throw error.response?.data?.error || error.message;
+      }
+    },
+
+  fetchUsers: async (page = 1, limit = 2) => {
     set({ usersLoading: true, usersError: null });
     try {
       const response = await apiClient.get(`/user?page=${page}&limit=${limit}`);
       set({ 
         users: response.data.users,
         totalUsers: response.data.total,
+        currentPage: response.data.currentPage,
+        totalPages: response.data.pages,
         usersLoading: false 
       });
     } catch (error) {

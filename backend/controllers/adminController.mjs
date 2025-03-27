@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import { configDotenv } from 'dotenv';
 import User from "../models/user.mjs";
+import Cabinet from "../models/cabinet.mjs";
 
 configDotenv();
 
@@ -58,6 +59,16 @@ export default class AdminController{
             return res.status(500).json({ error: error.message });
         }
     }
+
+    static async getCabinets(req, res) {
+        try {
+            const alldata = await Cabinet.find()
+            res.json(alldata)
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: error.message });
+        }
+      }
 
     static async deleteUser(req, res) {
         try {
