@@ -60,6 +60,51 @@ export default class AdminController{
         }
     }
 
+    static async addCabinetToUser(req, res) {
+        try {
+            const { id } = req.params;
+            const { cabinets: newCabinets } = req.body;
+
+            //Объединение массивов и удаление дубликатов
+            const updatedCabinets = [...new Set([...user.cabinets, ...newCabinets])];
+    
+            const updatedUser = await User.findByIdAndUpdate(
+                id,
+                { cabinets: updatedCabinets },
+                { new: true }
+            ).populate('cabinets');
+    
+            return res.status(200).json({
+                message: 'Кабинеты успешно добавлены',
+                user: updatedUser
+            });
+    
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ 
+                error: "Ошибка при добавлении кабинетов",
+                details: error.message 
+            });
+        }
+    }
+
+    static async createCabinet(req,res) {
+        try {
+            const {cabinet, year, S, name} = req.body;
+            const cab = new Cabinet({
+                cabinet,
+                year,
+                S,
+                name
+            });
+            await cab.save();
+            res.status(201).json({msg:'Создан кабинет'});
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
     static async getCabinets(req, res) {
         try {
             const alldata = await Cabinet.find()

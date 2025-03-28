@@ -236,11 +236,17 @@ const useCabinetStore = create((set, get) => ({
     }
   },
 
-  generateDocument: async ({ cabinetId, umkIds, specIds, schemaId }) => {
+  generateDocument: async ({ cabinetId, cabinetName, umkIds, specIds, schemaId }) => {
     try {
       const response = await apiClient.post(
         '/gendocx', 
-        { cabinetId, umkIds, specIds, schemaId },
+        { 
+          cabinetId,
+          cabinetName,
+          umkIds, 
+          specIds, 
+          schemaId 
+        },
         { responseType: 'blob' }
       );
       return response.data;
@@ -250,6 +256,57 @@ const useCabinetStore = create((set, get) => ({
       throw errorMessage;
     }
   },
+
+  createCabinet: async (cabinetData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.post('/cabinet', cabinetData);
+      
+      // Обновляем список всех кабинетов
+      set(state => ({
+        allCabinets: [...state.allCabinets, response.data],
+        isLoading: false
+      }));
+      
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message;
+      set({ error: errorMessage, isLoading: false });
+      throw errorMessage;
+    }
+  },
+
+  addUserCabinets: async (userId, cabinets) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.put(`/user/addcabinet/${userId}`, { cabinets });
+      
+      // Обновляем список пользователей
+      set(state => ({
+        users: state.users.map(user => 
+          user._id === userId ? response.data : user
+        ),
+        isLoading: false
+      }));
+      
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message;
+      set({ error: errorMessage, isLoading: false });
+      throw errorMessage;
+    }
+  },
+
+  deletePasport: async (pasportId) => {
+    try {
+        await apiClient.delete(`/${pasportId}`);
+        set(state => ({
+            pasports: state.pasports.filter(p => p._id !== pasportId)
+        }));
+    } catch (error) {
+        throw error.response?.data?.error || error.message;
+    }
+},
 }));
 
 export default useCabinetStore;

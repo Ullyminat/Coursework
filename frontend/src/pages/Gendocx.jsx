@@ -14,7 +14,8 @@ import {
   Alert,
   ListItemText,
   Checkbox,
-  ThemeProvider
+  ThemeProvider,
+  TextField
 } from '@mui/material';
 import useCabinetStore from '../store/store';
 import theme from '../components/theme';
@@ -36,7 +37,8 @@ const Gendocx = () => {
     error
   } = useCabinetStore();
 
-  const [selectedCabinet, setSelectedCabinet] = useState('');
+  const [selectedCabinetId, setSelectedCabinetId] = useState('');
+  const [cabinetName, setCabinetName] = useState('');
   const [selectedUmk, setSelectedUmk] = useState([]);
   const [selectedSpecs, setSelectedSpecs] = useState([]);
   const [selectedSchema, setSelectedSchema] = useState('');
@@ -48,15 +50,27 @@ const Gendocx = () => {
     fetchUserSchemas();
   }, []);
 
+  // Автозаполнение названия при выборе кабинета
+  useEffect(() => {
+    if (selectedCabinetId && cabinets.length > 0) {
+      const selectedCab = cabinets.find(c => c._id === selectedCabinetId);
+      if (selectedCab) {
+        setCabinetName(selectedCab.name);
+      }
+    }
+  }, [selectedCabinetId, cabinets]);
+
   const handleGenerate = async () => {
     try {
-      if (!selectedCabinet || selectedUmk.length === 0 || 
-          selectedSpecs.length === 0 || !selectedSchema) {
+      if (!selectedCabinetId || !cabinetName.trim() || 
+          selectedUmk.length === 0 || selectedSpecs.length === 0 || 
+          !selectedSchema) {
         throw new Error('Заполните все обязательные поля');
       }
 
       const blob = await generateDocument({
-        cabinetId: selectedCabinet,
+        cabinetId: selectedCabinetId,
+        cabinetName: cabinetName,
         umkIds: selectedUmk,
         specIds: selectedSpecs,
         schemaId: selectedSchema
@@ -75,135 +89,147 @@ const Gendocx = () => {
   };
 
   const isFormValid = () => {
-    return selectedCabinet && selectedUmk.length > 0 && 
-           selectedSpecs.length > 0 && selectedSchema;
+    return selectedCabinetId && 
+           cabinetName.trim() && 
+           selectedUmk.length > 0 && 
+           selectedSpecs.length > 0 && 
+           selectedSchema;
   };
 
   return (
     <ThemeProvider theme={theme}>
       <Header />
-    <Container component="main" maxWidth="md">
-      <Paper elevation={3} sx={{ p: 4, borderRadius: '16px', mt: 5 }}>
-      <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center'
-          }}
-        >
-        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-          Генератор паспорта кабинета
-        </Typography>
+      <Container component="main" maxWidth="md">
+        <Paper elevation={3} sx={{ p: 4, borderRadius: '16px', mt: 5 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center'
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+              Генератор паспорта кабинета
+            </Typography>
           </Box>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-        <Box sx={{ display: 'grid', gap: 3, mb: 4 }}>
-          <FormControl fullWidth>
-            <InputLabel>Кабинет</InputLabel>
-            <Select
-              value={selectedCabinet}
-              onChange={(e) => setSelectedCabinet(e.target.value)}
-              label="Кабинет"
-            >
-              {cabinets.map((cabinet) => (
-                <MenuItem key={cabinet._id} value={cabinet._id}>
-                  {cabinet.name} (№{cabinet.cabinet})
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Box sx={{ display: 'grid', gap: 3, mb: 4 }}>
+            <FormControl fullWidth>
+              <InputLabel>Кабинет (номер)</InputLabel>
+              <Select
+                value={selectedCabinetId}
+                onChange={(e) => setSelectedCabinetId(e.target.value)}
+                label="Кабинет (номер)"
+              >
+                {cabinets.map((cabinet) => (
+                  <MenuItem key={cabinet._id} value={cabinet._id}>
+                    №{cabinet.cabinet} ({cabinet.name})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-          <FormControl fullWidth>
-            <InputLabel>УМК</InputLabel>
-            <Select
-              multiple
-              value={selectedUmk}
-              onChange={(e) => setSelectedUmk(e.target.value)}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip
-                      key={value}
-                      label={umk.find(u => u._id === value)?.name}
-                      onDelete={() => setSelectedUmk(selected.filter(v => v !== value))}
+            <FormControl fullWidth>
+              <TextField
+                label="Название кабинета"
+                value={cabinetName}
+                onChange={(e) => setCabinetName(e.target.value)}
+                required
+              />
+            </FormControl>
+
+            <FormControl fullWidth>
+              <InputLabel>УМК</InputLabel>
+              <Select
+                multiple
+                value={selectedUmk}
+                onChange={(e) => setSelectedUmk(e.target.value)}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((value) => (
+                      <Chip
+                        key={value}
+                        label={umk.find(u => u._id === value)?.name}
+                        onDelete={() => setSelectedUmk(selected.filter(v => v !== value))}
+                      />
+                    ))}
+                  </Box>
+                )}
+              >
+                {umk.map((item) => (
+                  <MenuItem key={item._id} value={item._id}>
+                    <Checkbox checked={selectedUmk.includes(item._id)} />
+                    <ListItemText 
+                      primary={item.name} 
+                      secondary={`Год: ${item.year}`} 
                     />
-                  ))}
-                </Box>
-              )}
-            >
-              {umk.map((item) => (
-                <MenuItem key={item._id} value={item._id}>
-                  <Checkbox checked={selectedUmk.includes(item._id)} />
-                  <ListItemText 
-                    primary={item.name} 
-                    secondary={`Год: ${item.year}`} 
-                  />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-          <FormControl fullWidth>
-            <InputLabel>Спецификации</InputLabel>
-            <Select
-              multiple
-              value={selectedSpecs}
-              onChange={(e) => setSelectedSpecs(e.target.value)}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip
-                      key={value}
-                      label={specs.find(s => s._id === value)?.name}
-                      onDelete={() => setSelectedSpecs(selected.filter(v => v !== value))}
-                    />
-                  ))}
-                </Box>
-              )}
-            >
-              {specs.map((spec) => (
-                <MenuItem key={spec._id} value={spec._id}>
-                  <Checkbox checked={selectedSpecs.includes(spec._id)} />
-                  <ListItemText primary={spec.name} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+            <FormControl fullWidth>
+              <InputLabel>Спецификации</InputLabel>
+              <Select
+                multiple
+                value={selectedSpecs}
+                onChange={(e) => setSelectedSpecs(e.target.value)}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((value) => (
+                      <Chip
+                        key={value}
+                        label={specs.find(s => s._id === value)?.name}
+                        onDelete={() => setSelectedSpecs(selected.filter(v => v !== value))}
+                      />
+                    ))}
+                  </Box>
+                )}
+              >
+                {specs.map((spec) => (
+                  <MenuItem key={spec._id} value={spec._id}>
+                    <Checkbox checked={selectedSpecs.includes(spec._id)} />
+                    <ListItemText primary={spec.name} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-          <FormControl fullWidth>
-            <InputLabel>Схема помещения</InputLabel>
-            <Select
-              value={selectedSchema}
-              onChange={(e) => setSelectedSchema(e.target.value)}
-              label="Схема помещения"
-            >
-              {schemas.map((schema) => (
-                <MenuItem key={schema._id} value={schema._id}>
-                  {schema.image.split('/').pop()}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
+            <FormControl fullWidth>
+              <InputLabel>Схема помещения</InputLabel>
+              <Select
+                value={selectedSchema}
+                onChange={(e) => setSelectedSchema(e.target.value)}
+                label="Схема помещения"
+              >
+                {schemas.map((schema) => (
+                  <MenuItem key={schema._id} value={schema._id}>
+                    {schema.image.split('/').pop()}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
 
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          onClick={handleGenerate}
-          disabled={!isFormValid() || isLoading}
-          startIcon={<Description />}
-        >
-          Сгенерировать документ
-        </Button>
-      </Paper>
-    </Container>
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            onClick={handleGenerate}
+            disabled={!isFormValid() || isLoading}
+            startIcon={<Description />}
+          >
+            {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Сгенерировать документ'}
+          </Button>
+        </Paper>
+      </Container>
     </ThemeProvider>
   );
 };

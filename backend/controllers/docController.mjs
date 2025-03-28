@@ -15,144 +15,144 @@ import sizeOf from 'image-size';
 export default class DocController {
   static async generateDoc(req, res) {
     try {
-      const { cabinetId, umkIds, specIds, schemaId } = req.body;
-      const userId = req.user._id;
+        const { cabinetId, cabinetName, umkIds, specIds, schemaId } = req.body;
+        const userId = req.user._id;
 
-      if (!cabinetId || !umkIds || !specIds || !schemaId) {
-        return res.status(400).json({ error: "Missing required fields" });
-      }
-
-      const user = await User.findById(userId);
-      const cabinet = await Cabinet.findById(cabinetId);
-      const umks = await UMK.find({ _id: { $in: umkIds } });
-      const specs = await Spec.find({ _id: { $in: specIds } });
-      const schema = await Schemas.findById(schemaId);
-
-      if (!user || !cabinet || !schema) {
-        return res.status(404).json({ error: "Data not found" });
-      }
-
-      if (umks.length !== umkIds.length || specs.length !== specIds.length) {
-        return res.status(404).json({ error: "Some UMKs or Specs not found" });
-      }
-
-      if (
-        !schema.schema_data ||
-        !schema.schema_data.nodes ||
-        !Array.isArray(schema.schema_data.nodes)
-      ) {
-        return res.status(400).json({ error: "Invalid schema data structure" });
-      }
-
-      //Подсчет элементов схемы
-      const counts = schema.schema_data.nodes.reduce((acc, node) => {
-        if (node.type !== undefined) {
-          acc[node.type] = (acc[node.type] || 0) + 1;
+        // Валидация обязательных полей
+        if (!cabinetId || !cabinetName || !umkIds || !specIds || !schemaId) {
+            return res.status(400).json({ error: "Missing required fields" });
         }
-        return acc;
-      }, {});
 
-      const requiredTypes = ['board','studentDesk','studentChair','teacherDesk','teacherChair','window','door','socket','cabinet','computer','tv'];
-      requiredTypes.forEach(type => {
-        counts[type] = counts[type] || 0;
-      });
+        // Получение данных из БД
+        const user = await User.findById(userId);
+        const cabinet = await Cabinet.findById(cabinetId);
+        const umks = await UMK.find({ _id: { $in: umkIds } });
+        const specs = await Spec.find({ _id: { $in: specIds } });
+        const schema = await Schemas.findById(schemaId);
 
-      //Проверка и загрузка изображения
-      if (!schema.image || !fs.existsSync(schema.image)) {
-        return res.status(400).json({ error: "Image file not found" });
-      }
+        // Проверка существования данных
+        if (!user || !schema) {
+            return res.status(404).json({ error: "User or schema not found" });
+        }
 
-      //Изображение в буфер
-      const imageBuffer = fs.readFileSync(schema.image);
+        if (umks.length !== umkIds.length || specs.length !== specIds.length) {
+            return res.status(404).json({ error: "Some UMKs or Specs not found" });
+        }
 
-      //Размеры изображения
-      const dimensions = sizeOf(imageBuffer);
+        // Валидация структуры схемы
+        if (!schema.schema_data?.nodes || !Array.isArray(schema.schema_data.nodes)) {
+            return res.status(400).json({ error: "Invalid schema data structure" });
+        }
 
-      //Ширина изображения
-      const DESIRED_WIDTH = 650;
+        // Подсчёт элементов схемы
+        const counts = schema.schema_data.nodes.reduce((acc, node) => {
+            if (node.type !== undefined) {
+                acc[node.type] = (acc[node.type] || 0) + 1;
+            }
+            return acc;
+        }, {});
 
-      const aspectRatio = dimensions.width / dimensions.height;
-      const desiredHeight = Math.round(DESIRED_WIDTH / aspectRatio);
+        // Инициализация обязательных типов
+        const requiredTypes = ['board','studentDesk','studentChair','teacherDesk',
+                             'teacherChair','window','door','socket','cabinet','computer','tv'];
+        requiredTypes.forEach(type => {
+            counts[type] = counts[type] || 0;
+        });
 
-      //Загрузка шаблона документа
-      const templatePath = path.resolve("media/template.docx");
-      const content = fs.readFileSync(templatePath, "binary");
+        // Проверка и загрузка изображения
+        if (!schema.image || !fs.existsSync(schema.image)) {
+            return res.status(400).json({ error: "Image file not found" });
+        }
 
-      const zip = new PizZip(content);
+        // Обработка изображения
+        const imageBuffer = fs.readFileSync(schema.image);
+        const dimensions = sizeOf(imageBuffer);
+        const DESIRED_WIDTH = 650;
+        const aspectRatio = dimensions.width / dimensions.height;
+        const desiredHeight = Math.round(DESIRED_WIDTH / aspectRatio);
 
-      //Настройка модуля для работы с изображениями
-      const imageModule = new ImageModule({
-        getImage: (tagValue) => {
-          return fs.readFileSync(tagValue);
-        },
-        getSize: () => {
-          return [DESIRED_WIDTH, desiredHeight];
-        },
-      });
+        // Загрузка шаблона документа
+        const templatePath = path.resolve("media/template.docx");
+        const content = fs.readFileSync(templatePath, "binary");
+        const zip = new PizZip(content);
 
-      const doc = new Docxtemplater(zip, {
-        modules: [imageModule],
-        paragraphLoop: true,
-        linebreaks: true,
-      });
+        // Настройка модуля для работы с изображениями
+        const imageModule = new ImageModule({
+            getImage: (tagValue) => fs.readFileSync(tagValue),
+            getSize: () => [DESIRED_WIDTH, desiredHeight],
+        });
 
-      //Данные для шаблона
-      const data = {
-        ...counts,
-        image: schema.image,
-        year: new Date().getFullYear(),
-        user: {
-          name: user.name,
-          surname: user.surname,
-          patronymic: user.patronymic,
-        },
-        num_cabinet: cabinet.cabinet,
-        cabinet_year: cabinet.year,
-        name_cabinet: cabinet.name,
-        head_of_cabinet: `${user.surname} ${user.name} ${user.patronymic}`,
-        head_of_cab: `${user.name[0]}. ${user.patronymic[0]}. ${user.surname}`,
-        S: cabinet.S,
-        umk: umks.map((umk) => ({ name: umk.name, year: umk.year })),
-        spec: specs.map((spec) => ({ name: spec.name })),
-      };
+        // Инициализация Docxtemplater
+        const doc = new Docxtemplater(zip, {
+            modules: [imageModule],
+            paragraphLoop: true,
+            linebreaks: true,
+        });
 
-      // Рендер
-      doc.render(data);
+        // Подготовка данных для шаблона
+        const data = {
+            ...counts,
+            image: schema.image,
+            year: new Date().getFullYear(),
+            user: {
+                name: user.name,
+                surname: user.surname,
+                patronymic: user.patronymic,
+            },
+            num_cabinet: cabinet?.cabinet || '', // Номер из БД (если есть)
+            cabinet_year: cabinet?.year || '',    // Год из БД (если есть)
+            name_cabinet: cabinetName,           // Используем переданное название
+            head_of_cabinet: `${user.surname} ${user.name} ${user.patronymic}`,
+            head_of_cab: `${user.name[0]}. ${user.patronymic[0]}. ${user.surname}`,
+            S: cabinet?.S || '',                 // Площадь из БД (если есть)
+            umk: umks.map((umk) => ({ name: umk.name, year: umk.year })),
+            spec: specs.map((spec) => ({ name: spec.name })),
+        };
 
-      //Генерация файла
-      const buf = doc.getZip().generate({ type: "nodebuffer" });
+        // Рендер документа
+        doc.render(data);
 
-      const pasport = new Pasport({
-        cabinets: [cabinetId],
-        UMK: umkIds,
-        specs: specIds,
-        createdBy: userId,
-        schema: schemaId,
-        file: buf,
-      });
+        // Генерация файла
+        const buf = doc.getZip().generate({ type: "nodebuffer" });
 
-      await User.findByIdAndUpdate(
-        userId,
-        { $push: { pasports: pasport._id } },
-        { new: true, useFindAndModify: false }
-      );
+        // Создание записи паспорта
+        const pasport = new Pasport({
+            cabinets: [cabinetId],
+            UMK: umkIds,
+            specs: specIds,
+            createdBy: userId,
+            schema: schemaId,
+            file: buf,
+        });
 
-      const fileName = `cabinet-${cabinet.cabinet}-pasport-${Date.now()}.docx`;
-      const filePath = path.resolve(`media/doc/${fileName}`);
-      fs.writeFileSync(filePath, buf);
+        // Обновление пользователя
+        await User.findByIdAndUpdate(
+            userId,
+            { $push: { pasports: pasport._id } },
+            { new: true, useFindAndModify: false }
+        );
 
-      //Обновление записи паспорта
-      pasport.file = fileName;
-      await pasport.save();
+        // Сохранение файла
+        const fileName = `cabinet-${cabinet?.cabinet || 'custom'}-pasport-${Date.now()}.docx`;
+        const filePath = path.resolve(`media/doc/${fileName}`);
+        fs.writeFileSync(filePath, buf);
 
-      res.setHeader("Content-Disposition", "attachment; filename=document.docx");
-      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-      res.send(buf);
+        // Обновление записи паспорта
+        pasport.file = fileName;
+        await pasport.save();
+
+        // Отправка документа
+        res.setHeader("Content-Disposition", "attachment; filename=document.docx");
+        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        res.send(buf);
     } catch (error) {
-      console.error("Document generation error:", error);
-      res.status(500).json({ error: "Document generation failed", details: error.message });
+        console.error("Document generation error:", error);
+        res.status(500).json({ 
+            error: "Document generation failed", 
+            details: error.message 
+        });
     }
-  }
+}
 
   static async saveSchema(req, res) {
     try {
@@ -186,6 +186,28 @@ export default class DocController {
     }
   }
 
+static async deletePasport(req, res) {
+  try {
+      const { pasportId } = req.params;
+      const userId = req.user._id;
+      const pasport = await Pasport.findById(pasportId);
+
+      const filePath = path.resolve(`media/doc/${pasport.file}`);
+      if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+      }
+      await Pasport.findByIdAndDelete(pasportId);
+      await User.findByIdAndUpdate(
+          userId,
+          { $pull: { pasports: pasportId } }
+      );
+      return res.status(200).json({ message: "Паспорт успешно удалён" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+
   static async downloadPasport(req, res) {
     try {
       const { pasportId } = req.params;
@@ -211,11 +233,8 @@ export default class DocController {
       res.sendFile(filePath);
   
     } catch (error) {
-      console.error("Ошибка загрузки:", error);
-      res.status(500).json({ 
-        error: "Ошибка при скачивании паспорта",
-        details: error.message 
-      });
+      console.log(error);
+      return res.status(500).json({ error: error.message });
     }
   }
 }
