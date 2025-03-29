@@ -19,12 +19,15 @@ import {
   Alert,
   IconButton
 } from '@mui/material';
-import { Delete as DeleteIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import useCabinetStore from '../store/store';
 import Header from '../components/Header';
 import theme from '../components/theme';
 import DeleteModal from '../components/DeleteModal';
+import CreateUserModal from '../components/CreateUserModal';
 import CreateUserForm from '../components/CreateUserForm';
+import CreateCabinetModal from '../components/CreateCabinetModal';
+import CreateCabinetForm from '../components/CreateCabinetForm';
 
 const AdminPanel = () => {
   const {
@@ -40,15 +43,18 @@ const AdminPanel = () => {
   } = useCabinetStore();
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const limit = 2;
+  const [createCabinetModalOpen, setCreateCabinetModalOpen] = useState(false);
+  const limit = 4;
 
   useEffect(() => {
     fetchUsers(currentPage, limit);
   }, [currentPage, fetchUsers]);
 
   const handleUserCreated = () => {
+    setCreateModalOpen(false);
     fetchUsers(currentPage, limit);
   };
 
@@ -74,12 +80,20 @@ const AdminPanel = () => {
     setIsDeleting(true);
     try {
       if (selectedUser) {
-        await deleteUser(selectedUser._id);
-        fetchUsers(currentPage, limit);
+        const success = await deleteUser(selectedUser._id);
+        if (success) {
+          const updatedTotal = totalUsers - 1;
+          const newTotalPages = Math.ceil(updatedTotal / limit);
+          
+          if (currentPage > newTotalPages) {
+            await fetchUsers(newTotalPages, limit);
+          } else {
+            await fetchUsers(currentPage, limit);
+          }
+        }
       }
     } catch (error) {
-      console.error('Ошибка при удалении:', error);
-      alert('Не удалось удалить пользователя');
+      alert(`Ошибка при удалении: ${error}`);
     } finally {
       setIsDeleting(false);
       setDeleteModalOpen(false);
@@ -99,15 +113,63 @@ const AdminPanel = () => {
         isLoading={isDeleting}
       />
 
+      <CreateUserModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onUserCreated={handleUserCreated}
+        formComponent={<CreateUserForm onUserCreated={handleUserCreated} />}
+      />
+
+      <CreateCabinetModal
+      open={createCabinetModalOpen}
+      onClose={() => setCreateCabinetModalOpen(false)}
+      onCabinetCreated={() => {
+        setCreateCabinetModalOpen(false);
+      }}
+      formComponent={<CreateCabinetForm onCabinetCreated={() => setCreateCabinetModalOpen(false)} />}
+    />
+
       <Container component="main" maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-        <CreateUserForm onUserCreated={handleUserCreated} />
-        
-        <Paper elevation={3} sx={{ p: 4, borderRadius: '16px', backgroundColor: 'background.paper'}}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-              Управление пользователями
-            </Typography>
-          </Box>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-evenly', 
+          alignItems: 'center',
+          mb: 3
+        }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateModalOpen(true)}
+            sx={{
+              borderRadius: '8px',
+              textTransform: 'none',
+              minWidth: '300px',
+              px: 3,
+              py: 1
+            }}
+          >
+            Новый пользователь
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateCabinetModalOpen(true)}
+            sx={{
+              borderRadius: '8px',
+              textTransform: 'none',
+              minWidth: '300px',
+              px: 3,
+              py: 1
+            }}
+          >
+            Новый кабинет
+          </Button>
+        </Box>
+
+        <Paper elevation={3} sx={{ p: 4, borderRadius: '16px', mb: 4 }}>
+          <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+            Список пользователей
+          </Typography>
 
           {usersError && (
             <Alert severity="error" sx={{ mb: 3 }}>
@@ -125,23 +187,24 @@ const AdminPanel = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>ФИО</TableCell>
-                      <TableCell>Email</TableCell>
-                      <TableCell>Роль</TableCell>
-                      <TableCell>Действия</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>ФИО</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Email</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Роль</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Действия</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {users?.length > 0 ? (
                       users.map((user) => (
-                        <TableRow key={user._id}>
-                          <TableCell>{`${user.surname} ${user.name} ${user.patronymic}`}</TableCell>
+                        <TableRow key={user._id} hover>
+                          <TableCell>{`${user.surname} ${user.name} ${user.patronymic || ''}`}</TableCell>
                           <TableCell>{user.email}</TableCell>
                           <TableCell>
                             <Select
                               value={user.role}
                               onChange={(e) => handleRoleChange(user._id, e.target.value)}
                               size="small"
+                              sx={{ minWidth: 120 }}
                             >
                               <MenuItem value="user">Пользователь</MenuItem>
                               <MenuItem value="admin">Администратор</MenuItem>
@@ -160,8 +223,10 @@ const AdminPanel = () => {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={4} align="center">
-                          Нет данных о пользователях
+                        <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
+                          <Typography color="text.secondary">
+                            Нет данных о пользователях
+                          </Typography>
                         </TableCell>
                       </TableRow>
                     )}
@@ -170,7 +235,7 @@ const AdminPanel = () => {
               </TableContainer>
 
               {totalUsers > limit && (
-                <Box display="flex" justifyContent="center" mt={3}>
+                <Box display="flex" justifyContent="center" mt={4}>
                   <Pagination
                     count={totalPages}
                     page={currentPage}
@@ -178,6 +243,11 @@ const AdminPanel = () => {
                     color="primary"
                     showFirstButton
                     showLastButton
+                    sx={{
+                      '& .MuiPaginationItem-root': {
+                        borderRadius: '8px'
+                      }
+                    }}
                   />
                 </Box>
               )}

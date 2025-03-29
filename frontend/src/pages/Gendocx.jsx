@@ -122,11 +122,11 @@ const Gendocx = () => {
 
           <Box sx={{ display: 'grid', gap: 3, mb: 4 }}>
             <FormControl fullWidth>
-              <InputLabel>Кабинет (номер)</InputLabel>
+              <InputLabel>Кабинет</InputLabel>
               <Select
                 value={selectedCabinetId}
                 onChange={(e) => setSelectedCabinetId(e.target.value)}
-                label="Кабинет (номер)"
+                label="Кабинет"
               >
                 {cabinets.map((cabinet) => (
                   <MenuItem key={cabinet._id} value={cabinet._id}>
@@ -141,7 +141,6 @@ const Gendocx = () => {
                 label="Название кабинета"
                 value={cabinetName}
                 onChange={(e) => setCabinetName(e.target.value)}
-                required
               />
             </FormControl>
 

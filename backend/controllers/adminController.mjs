@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { configDotenv } from 'dotenv';
 import User from "../models/user.mjs";
 import Cabinet from "../models/cabinet.mjs";
+import Spec from "../models/spec.mjs";
 
 configDotenv();
 
@@ -99,6 +100,20 @@ export default class AdminController{
             });
             await cab.save();
             res.status(201).json({msg:'Создан кабинет'});
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async createSpec(req,res) {
+        try {
+            const {name} = req.body;
+            const spec = new Spec({
+                name
+            });
+            await spec.save();
+            res.status(201).json({msg:'Создана специализация'});
         } catch (error) {
             console.log(error)
             return res.status(500).json({ error: error.message });

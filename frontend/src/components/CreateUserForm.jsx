@@ -99,13 +99,14 @@ const CreateUserForm = ({ onUserCreated }) => {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 3, mb: 4, borderRadius: '16px' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-              Создание нового пользователя
-            </Typography>
-          </Box>
+    <>
 
+<Box 
+      component="form" 
+      id="create-user-form" 
+      onSubmit={handleSubmit} 
+      sx={{ mt: 2 }}
+    >
       {errorMessage && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {errorMessage}
@@ -237,22 +238,11 @@ const CreateUserForm = ({ onUserCreated }) => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" justifyContent="center">
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={loading}
-                sx={{ minWidth: 300 }}
-              >
-                {loading ? <CircularProgress size={24} /> : 'Создать'}
-              </Button>
-            </Box>
-          </Grid>
+
         </Grid>
       </form>
-    </Paper>
+      </Box>
+    </>
   );
 };
 

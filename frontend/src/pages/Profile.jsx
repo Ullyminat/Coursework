@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   ThemeProvider, 
   Container, 
@@ -14,15 +14,18 @@ import {
   Card,
   CardContent,
   CardActions,
-  Skeleton
+  Skeleton,
+  IconButton
 } from '@mui/material';
 import { 
   Download as DownloadIcon,
   Description as DocumentIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import useCabinetStore from '../store/store';
 import Header from '../components/Header';
 import theme from '../components/theme';
+import DeleteModalPasport from '../components/DeleteModalPasport';
 
 const Profile = () => {
   const { 
@@ -33,24 +36,59 @@ const Profile = () => {
     downloadPasport,
     currentUser,
     fetchCurrentUser,
-    userLoading 
+    userLoading,
+    deletePasport
   } = useCabinetStore();
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedPasport, setSelectedPasport] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchCurrentUser();
     fetchPasports();
-  }, []);
+  }, [fetchCurrentUser, fetchPasports]);
 
   const formatDate = (dateString) => {
-    const options = { day: 'numeric', month: 'long', y: 'numeric' };
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('ru-RU', options);
+  };
+
+  const handleDeleteClick = (pasport) => {
+    setSelectedPasport(pasport);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      if (selectedPasport) {
+        await deletePasport(selectedPasport._id);
+        await fetchPasports();
+      }
+    } catch (error) {
+      console.error('Ошибка при удалении:', error);
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalOpen(false);
+      setSelectedPasport(null);
+    }
   };
 
   return (
     <ThemeProvider theme={theme}>
       <Header />
-      <Container component="main" maxWidth="md" sx={{ py: 4} }>
-        <Paper elevation={3} sx={{ p: 4, borderRadius: '16px', backgroundColor: 'background.paper'}}>
+      
+      <DeleteModalPasport
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        userName={selectedPasport?.file || ''}
+        isLoading={isDeleting}
+      />
+
+      <Container component="main" maxWidth="md" sx={{ py: 4 }}>
+        <Paper elevation={3} sx={{ p: 4, borderRadius: '16px', backgroundColor: 'background.paper' }}>
           {/* Секция профиля */}
           <Stack direction="row" spacing={3} alignItems="center" sx={{ mb: 4 }}>
             <Avatar sx={{ 
@@ -68,7 +106,7 @@ const Profile = () => {
               </Box>
             ) : (
               <Box>
-                <Typography variant="h6" sx={{ mb: 1 , fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
                   Добро пожаловать, {currentUser?.name || 'Пользователь'}
                 </Typography>
                 <Typography variant="subtitle1" color="text.secondary">
@@ -135,7 +173,7 @@ const Profile = () => {
                       </Typography>
                     </Box>
 
-                    <CardActions>
+                    <CardActions sx={{ gap: 1 }}>
                       <Button
                         startIcon={<DownloadIcon />}
                         variant="contained"
@@ -148,6 +186,13 @@ const Profile = () => {
                       >
                         Скачать
                       </Button>
+                      <IconButton
+                        onClick={() => handleDeleteClick(pasport)}
+                        color="error"
+                        disabled={isLoading}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
                     </CardActions>
                   </CardContent>
                 </Card>

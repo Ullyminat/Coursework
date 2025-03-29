@@ -104,15 +104,20 @@ const useCabinetStore = create((set, get) => ({
 
   deleteUser: async (userId) => {
     try {
+      set({ isLoading: true, error: null });
       await apiClient.delete(`/user/${userId}`);
       set(state => ({
         users: state.users.filter(user => user._id !== userId),
-        totalUsers: state.totalUsers - 1
+        totalUsers: state.totalUsers - 1,
+        isLoading: false
       }));
+      return true;
     } catch (error) {
-      throw error.response?.data?.error || error.message;
+      const errorMessage = error.response?.data?.error || error.message;
+      set({ error: errorMessage, isLoading: false });
+      throw errorMessage;
     }
-  },
+},
 
   // Загрузка кабинетов пользователя
   fetchCabinets: async () => {
