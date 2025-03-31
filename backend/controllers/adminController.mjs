@@ -4,6 +4,7 @@ import { configDotenv } from 'dotenv';
 import User from "../models/user.mjs";
 import Cabinet from "../models/cabinet.mjs";
 import Spec from "../models/spec.mjs";
+import UMK from "../models/umk.mjs";
 
 configDotenv();
 
@@ -114,6 +115,21 @@ export default class AdminController{
             });
             await spec.save();
             res.status(201).json({msg:'Создана специализация'});
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async createUMK(req,res) {
+        try {
+            const {name, year} = req.body;
+            const umk = new UMK({
+                name,
+                year
+            });
+            await umk.save();
+            res.status(201).json({msg:'Создан УМК'});
         } catch (error) {
             console.log(error)
             return res.status(500).json({ error: error.message });

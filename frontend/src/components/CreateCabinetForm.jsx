@@ -98,7 +98,7 @@ const CreateCabinetForm = ({ onCabinetCreated }) => {
             fullWidth
             label="Номер кабинета"
             name="cabinet"
-            type="number"
+            type="name"
             value={formData.cabinet}
             onChange={handleChange}
             error={!!errors.cabinet}

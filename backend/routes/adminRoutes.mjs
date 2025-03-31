@@ -12,5 +12,6 @@ adminrouter.delete('/user/:id', authToken,AdminController.deleteUser);
 adminrouter.get('/cabinets', authToken, AdminController.getCabinets);
 adminrouter.post('/cabinet', authToken, AdminController.createCabinet);
 adminrouter.post('/spec', authToken, AdminController.createSpec);
+adminrouter.post('/umk', authToken, AdminController.createUMK);
 
 export default adminrouter;

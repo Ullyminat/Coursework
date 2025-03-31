@@ -1,25 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-  ThemeProvider,
-  Container,
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
-  Button,
-  MenuItem,
-  Select,
-  Box,
-  Pagination,
-  Alert,
-  IconButton
-} from '@mui/material';
+import {ThemeProvider,Container,Paper,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,CircularProgress,Button,MenuItem,Select,Box,Pagination,Alert,IconButton} from '@mui/material';
 import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import useCabinetStore from '../store/store';
 import Header from '../components/Header';
 import theme from '../components/theme';
@@ -28,6 +10,12 @@ import CreateUserModal from '../components/CreateUserModal';
 import CreateUserForm from '../components/CreateUserForm';
 import CreateCabinetModal from '../components/CreateCabinetModal';
 import CreateCabinetForm from '../components/CreateCabinetForm';
+import CreateSpecModal from '../components/CreateSpecModal';
+import CreateSpecForm from '../components/CreateSpecForm';
+import CreateUMKModal from '../components/CreateUMKModal';
+import CreateUMKForm from '../components/CreateUMKForm';
+import EditUserCabinetsModal from '../components/EditUserCabinetsModal';
+
 
 const AdminPanel = () => {
   const {
@@ -47,6 +35,11 @@ const AdminPanel = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [createCabinetModalOpen, setCreateCabinetModalOpen] = useState(false);
+  const [createSpecModalOpen, setCreateSpecModalOpen] = useState(false);
+  const [createUMKModalOpen, setCreateUMKModalOpen] = useState(false);
+  const [editCabinetsModalOpen, setEditCabinetsModalOpen] = useState(false);
+const [selectedUserId, setSelectedUserId] = useState(null);
+const [selectedUserCabinets, setSelectedUserCabinets] = useState([]);
   const limit = 4;
 
   useEffect(() => {
@@ -56,6 +49,12 @@ const AdminPanel = () => {
   const handleUserCreated = () => {
     setCreateModalOpen(false);
     fetchUsers(currentPage, limit);
+  };
+
+  const handleEditCabinetsClick = (user) => {
+    setSelectedUserId(user._id);
+    setSelectedUserCabinets(user.cabinets || []);
+    setEditCabinetsModalOpen(true);
   };
 
   const handlePageChange = (_, value) => {
@@ -120,6 +119,31 @@ const AdminPanel = () => {
         formComponent={<CreateUserForm onUserCreated={handleUserCreated} />}
       />
 
+      <CreateUMKModal
+        open={createUMKModalOpen}
+        onClose={() => setCreateUMKModalOpen(false)}
+        onUMKCreated={() => {
+          setCreateUMKModalOpen(false);
+        }}
+        formComponent={<CreateUMKForm onUMKCreated={() => setCreateUMKModalOpen(false)} />}
+      />
+
+      <EditUserCabinetsModal
+        open={editCabinetsModalOpen}
+        onClose={() => setEditCabinetsModalOpen(false)}
+        userId={selectedUserId}
+        currentCabinets={selectedUserCabinets}
+      />
+
+      <CreateSpecModal
+        open={createSpecModalOpen}
+        onClose={() => setCreateSpecModalOpen(false)}
+        onSpecCreated={() => {
+          setCreateSpecModalOpen(false);
+        }}
+        formComponent={<CreateSpecForm onSpecCreated={() => setCreateSpecModalOpen(false)} />}
+      />
+
       <CreateCabinetModal
       open={createCabinetModalOpen}
       onClose={() => setCreateCabinetModalOpen(false)}
@@ -130,9 +154,10 @@ const AdminPanel = () => {
     />
 
       <Container component="main" maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-evenly', 
+      <Box sx={{ 
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 2,
           alignItems: 'center',
           mb: 3
         }}>
@@ -143,7 +168,7 @@ const AdminPanel = () => {
             sx={{
               borderRadius: '8px',
               textTransform: 'none',
-              minWidth: '300px',
+              minWidth: '100%',
               px: 3,
               py: 1
             }}
@@ -157,12 +182,42 @@ const AdminPanel = () => {
             sx={{
               borderRadius: '8px',
               textTransform: 'none',
-              minWidth: '300px',
+              minWidth: '32%',
               px: 3,
               py: 1
             }}
           >
             Новый кабинет
+          </Button>
+
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateUMKModalOpen(true)}
+            sx={{
+              borderRadius: '8px',
+              textTransform: 'none',
+              minWidth: '32%',
+              px: 3,
+              py: 1
+            }}
+          >
+            Новый УМК
+          </Button>
+
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateSpecModalOpen(true)}
+            sx={{
+              borderRadius: '8px',
+              textTransform: 'none',
+              minWidth: '32%',
+              px: 3,
+              py: 1
+            }}
+          >
+            Новая специализация
           </Button>
         </Box>
 
@@ -211,14 +266,20 @@ const AdminPanel = () => {
                             </Select>
                           </TableCell>
                           <TableCell>
-                            <IconButton 
-                              onClick={() => handleDeleteClick(user)}
-                              color="error"
-                              disabled={isDeleting}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </TableCell>
+                          <IconButton 
+                            onClick={() => handleEditCabinetsClick(user)}
+                            color="primary"
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton 
+                            onClick={() => handleDeleteClick(user)}
+                            color="error"
+                            disabled={isDeleting}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </TableCell>
                         </TableRow>
                       ))
                     ) : (

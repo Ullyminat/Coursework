@@ -89,6 +89,45 @@ const useCabinetStore = create((set, get) => ({
     }
   },
 
+  // Создание специализации
+  createSpec: async (name) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.post('/spec', { name });
+      
+      // Обновляем список спецификаций
+      set(state => ({
+        specs: [...state.specs, response.data],
+        isLoading: false
+      }));
+      
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message;
+      set({ error: errorMessage, isLoading: false });
+      throw errorMessage;
+    }
+  },
+
+  // Создание УМК
+  createUMK: async (name, year) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.post('/umk', { name, year });
+      
+      set(state => ({
+        umk: [...state.umk, response.data],
+        isLoading: false
+      }));
+      
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message;
+      set({ error: errorMessage, isLoading: false });
+      throw errorMessage;
+    }
+  },
+
   changeUserRole: async (userId, newRole) => {
     try {
       await apiClient.put(`/user/chrole/${userId}`, { role: newRole });
