@@ -9,7 +9,7 @@ import {
   Box,
   CircularProgress
 } from '@mui/material';
-import deleteGif from '../assets/t2.gif'
+import deleteGif from '../assets/t3.gif'
 
 const DeleteModal = ({ 
   open, 
