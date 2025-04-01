@@ -10,6 +10,9 @@ const useCabinetStore = create((set, get) => ({
   pasports: [],      // Добавляем новое поле для паспортов
   isLoading: false,
   error: null,
+  userDetails: null,
+  userDetailsLoading: false,
+  userDetailsError: null,
   currentUser: null,
   userLoading: false,
   userError: null,
@@ -86,6 +89,25 @@ const useCabinetStore = create((set, get) => ({
         usersError: error.response?.data?.error || error.message, 
         usersLoading: false 
       });
+    }
+  },
+
+  fetchUser: async (userId) => {
+    set({ userDetailsLoading: true, userDetailsError: null });
+    try {
+      const response = await apiClient.get(`/user/${userId}`);
+      set({ 
+        userDetails: response.data,
+        userDetailsLoading: false 
+      });
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message;
+      set({ 
+        userDetailsError: errorMessage, 
+        userDetailsLoading: false 
+      });
+      throw errorMessage;
     }
   },
 
@@ -320,26 +342,28 @@ const useCabinetStore = create((set, get) => ({
     }
   },
 
-  addUserCabinets: async (userId, cabinets) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await apiClient.put(`/user/addcabinet/${userId}`, { cabinets });
+addUserCabinets: async (userId, cabinets) => {
+  set({ isLoading: true, error: null });
+  try {
+      // Отправляем полный список кабинетов
+      const response = await apiClient.put(`/user/addcabinet/${userId}`, { 
+          cabinets 
+      });
       
-      // Обновляем список пользователей
       set(state => ({
-        users: state.users.map(user => 
-          user._id === userId ? response.data : user
-        ),
-        isLoading: false
+          users: state.users.map(user => 
+              user._id === userId ? response.data.user : user
+          ),
+          isLoading: false
       }));
       
       return response.data;
-    } catch (error) {
+  } catch (error) {
       const errorMessage = error.response?.data?.error || error.message;
       set({ error: errorMessage, isLoading: false });
       throw errorMessage;
-    }
-  },
+  }
+},
 
   deletePasport: async (pasportId) => {
     try {
