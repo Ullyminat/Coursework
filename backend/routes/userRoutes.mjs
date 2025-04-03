@@ -4,8 +4,10 @@ import { authToken } from '../middleware/authToken.mjs';
 
 const userrouter = express.Router();
 
+// POST
 userrouter.post('/login', UserController.login);
 userrouter.post('/logout', authToken, UserController.logout);
+// GET
 userrouter.get('/me', authToken, UserController.Me);
 userrouter.get('/me/cabinets', authToken, UserController.getCabinets);
 userrouter.get('/me/schemas', authToken, UserController.getSchema);

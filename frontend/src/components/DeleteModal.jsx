@@ -9,6 +9,7 @@ import {
   Box,
   CircularProgress
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import deleteGif from '../assets/t3.gif'
 
 const DeleteModal = ({ 
@@ -86,6 +87,7 @@ const DeleteModal = ({
           onClick={onConfirm}
           variant="contained"
           color="error"
+          startIcon={<DeleteIcon />}
           sx={{
             minWidth: '300px',
             borderRadius: '8px',

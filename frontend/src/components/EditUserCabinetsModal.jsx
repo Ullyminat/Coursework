@@ -16,6 +16,7 @@ import {
   Chip,
   Box
 } from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
 import useCabinetStore from '../store/store';
 
 const EditUserCabinetsModal = ({ 
@@ -71,6 +72,7 @@ const EditUserCabinetsModal = ({
       // Обновляем список пользователей после изменения
       await fetchUsers();
       onClose();
+      window.location.reload(); 
     } catch (err) {
       setError(err.message || 'Ошибка при обновлении кабинетов');
     } finally {
@@ -172,8 +174,8 @@ const EditUserCabinetsModal = ({
           onClick={handleSubmit}
           variant="contained"
           disabled={loading || cabinetsLoading}
+          startIcon={<SaveIcon />}
           sx={{ borderRadius: '8px', minWidth: '300px' }}
-          startIcon={loading && <CircularProgress size={20} color="inherit" />}
         >
           Сохранить
         </Button>

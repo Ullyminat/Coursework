@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken';
 import { configDotenv } from 'dotenv';
 import User from "../models/user.mjs";
 import Cabinet from "../models/cabinet.mjs";
@@ -9,6 +8,7 @@ import UMK from "../models/umk.mjs";
 configDotenv();
 
 export default class AdminController{
+    // Создание пользователя
     static async create(req,res){
         try{
             const {name,surname,patronymic,email,password,cabinets, role} = req.body;
@@ -30,6 +30,7 @@ export default class AdminController{
         }
     }
 
+    // Получение пользователей с пагинацией
     static async getUsers(req, res) {
         try {
             const page = parseInt(req.query.page) || 1;
@@ -50,6 +51,67 @@ export default class AdminController{
         }
     }
 
+    // Получение УМК с пагинацией
+    static async getUMKs(req, res) {
+        try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const total = await UMK.countDocuments();
+            
+            if(page < 1) throw new Error('Некорректный номер страницы');
+            
+            const skip = (page - 1) * limit;
+            const pages = Math.ceil(total / limit);
+            
+            const umks = await UMK.find().skip(skip).limit(limit);
+            return res.status(200).json({ total, currentPage: page, pages, limit, umks });
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    // Получение кабинетов с пагинацией
+    static async getCabinets(req, res) {
+        try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const total = await Cabinet.countDocuments();
+            
+            if(page < 1) throw new Error('Некорректный номер страницы');
+            
+            const skip = (page - 1) * limit;
+            const pages = Math.ceil(total / limit);
+            
+            const cabinets = await Cabinet.find().skip(skip).limit(limit);
+            return res.status(200).json({ total, currentPage: page, pages, limit, cabinets });
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    // Получение специализаций с пагинацией    
+    static async getSpecs(req, res) {
+        try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const total = await Spec.countDocuments();
+            
+            if(page < 1) throw new Error('Некорректный номер страницы');
+            
+            const skip = (page - 1) * limit;
+            const pages = Math.ceil(total / limit);
+            
+            const specs = await Spec.find().skip(skip).limit(limit);
+            return res.status(200).json({ total, currentPage: page, pages, limit, specs });
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    // Смена роли для пользователей
     static async changeRole(req,res) {
         try {
             const {id} = req.params;
@@ -62,6 +124,7 @@ export default class AdminController{
         }
     }
 
+    // Получение пользователя
     static async getUser(req,res) {
         try {
             const {id} = req.params;
@@ -73,35 +136,37 @@ export default class AdminController{
         }
     }
 
-static async updateUserCabinets(req, res) {
-    try {
-        const { id } = req.params;
-        const { cabinets } = req.body;
-        const user = await User.findById(id)
-        
-        // Удаляем дубликаты
-        const uniqueCabinets = [...new Set(cabinets)];
-        
-        const updatedUser = await User.findByIdAndUpdate(
-            id,
-            { cabinets: uniqueCabinets },
-            { new: true }
-        ).populate('cabinets');
+    // Изменение кабинетов для пользователя
+    static async updateUserCabinets(req, res) {
+        try {
+            const { id } = req.params;
+            const { cabinets } = req.body;
+            const user = await User.findById(id)
+            
+            // Удаляем дубликаты
+            const uniqueCabinets = [...new Set(cabinets)];
+            
+            const updatedUser = await User.findByIdAndUpdate(
+                id,
+                { cabinets: uniqueCabinets },
+                { new: true }
+            ).populate('cabinets');
 
-        return res.status(200).json({
-            message: 'Кабинеты успешно обновлены',
-            user: updatedUser
-        });
+            return res.status(200).json({
+                message: 'Кабинеты успешно обновлены',
+                user: updatedUser
+            });
 
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ 
-            error: "Ошибка при обновлении кабинетов",
-            details: error.message 
-        });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ 
+                error: "Ошибка при обновлении кабинетов",
+                details: error.message 
+            });
+        }
     }
-}
 
+    // Создание кабинета
     static async createCabinet(req,res) {
         try {
             const {cabinet, year, S, name} = req.body;
@@ -119,6 +184,7 @@ static async updateUserCabinets(req, res) {
         }
     }
 
+    // Создание специализации
     static async createSpec(req,res) {
         try {
             const {name} = req.body;
@@ -133,6 +199,7 @@ static async updateUserCabinets(req, res) {
         }
     }
 
+    // Создание УМК
     static async createUMK(req,res) {
         try {
             const {name, year} = req.body;
@@ -148,6 +215,7 @@ static async updateUserCabinets(req, res) {
         }
     }
 
+    // Получение всех кабинетов
     static async getCabinets(req, res) {
         try {
             const alldata = await Cabinet.find()
@@ -158,6 +226,7 @@ static async updateUserCabinets(req, res) {
         }
       }
 
+    // Удаление пользователя
     static async deleteUser(req, res) {
         try {
             const {id} = req.params;

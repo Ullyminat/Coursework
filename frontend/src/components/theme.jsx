@@ -116,6 +116,24 @@ const theme = createTheme({
         },
       },
     },
+    // Для фана
+    // MuiPaper: {
+    //   styleOverrides: {
+    //     root: {
+    //       boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+    //       transform: 'perspective(200px) rotateX(20deg) rotateY(20deg)',
+    //       transformStyle: 'preserve-3d',
+    //       transition: 'all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
+    //       position: 'relative',
+    //       '&:hover': {
+    //         transform: 'perspective(300px) rotateX(15deg) rotateY(-8deg) translateZ(50px)',
+    //         '&::before': {
+    //           opacity: 0.8,
+    //           height: '30px',
+    //           bottom: '-15px'
+    //         }
+    //       }
+    //     },},},
     MuiSelect: {
       styleOverrides: {
         root: {

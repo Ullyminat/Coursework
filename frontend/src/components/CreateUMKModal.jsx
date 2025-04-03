@@ -1,5 +1,6 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress, Box, Alert } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
 const CreateUMKModal = ({ open, onClose, onUMKCreated, loading, error, formComponent }) => {
   return (
@@ -27,6 +28,7 @@ const CreateUMKModal = ({ open, onClose, onUMKCreated, loading, error, formCompo
           form="create-umk-form"
           variant="contained"
           color="primary"
+          startIcon={<AddIcon/>}
           disabled={loading}
           sx={{ borderRadius: '8px', minWidth: '300px', px: 3 }}
         >

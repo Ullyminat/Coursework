@@ -9,6 +9,7 @@ import {
   Box,
   Alert
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
 const CreateSpecModal = ({ 
   open, 
@@ -56,6 +57,7 @@ const CreateSpecModal = ({
           form="create-spec-form"
           variant="contained"
           color="primary"
+          startIcon={<AddIcon/>}
           disabled={loading}
           sx={{
             borderRadius: '8px',

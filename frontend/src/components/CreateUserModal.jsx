@@ -1,4 +1,5 @@
 import { Dialog, DialogTitle, DialogContent, Box, DialogActions, Button } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 
 const CreateUserModal = ({ 
     open, 
@@ -48,6 +49,7 @@ const CreateUserModal = ({
             variant="contained"
             color="primary"
             disabled={loading}
+            startIcon={<AddIcon/>}
             sx={{
                 minWidth: '300px',
               borderRadius: '8px',
