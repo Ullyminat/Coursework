@@ -15,6 +15,7 @@ import CreateSpecForm from '../components/CreateSpecForm';
 import CreateUMKModal from '../components/CreateUMKModal';
 import CreateUMKForm from '../components/CreateUMKForm';
 import EditUserCabinetsModal from '../components/EditUserCabinetsModal';
+import AdminNavigation from '../components/AdminNavigation';
 
 
 const AdminPanel = () => {
@@ -161,7 +162,9 @@ const [selectedUserCabinets, setSelectedUserCabinets] = useState([]);
           alignItems: 'center',
           mb: 3
         }}>
-          <Button
+        <AdminNavigation />
+    
+    <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setCreateModalOpen(true)}
@@ -175,7 +178,7 @@ const [selectedUserCabinets, setSelectedUserCabinets] = useState([]);
           >
             Новый пользователь
           </Button>
-          <Button
+          {/* <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setCreateCabinetModalOpen(true)}
@@ -193,21 +196,6 @@ const [selectedUserCabinets, setSelectedUserCabinets] = useState([]);
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => setCreateUMKModalOpen(true)}
-            sx={{
-              borderRadius: '8px',
-              textTransform: 'none',
-              minWidth: '32%',
-              px: 3,
-              py: 1
-            }}
-          >
-            Новый УМК
-          </Button>
-
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
             onClick={() => setCreateSpecModalOpen(true)}
             sx={{
               borderRadius: '8px',
@@ -219,6 +207,22 @@ const [selectedUserCabinets, setSelectedUserCabinets] = useState([]);
           >
             Новая специализация
           </Button>
+
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateUMKModalOpen(true)}
+            sx={{
+              borderRadius: '8px',
+              textTransform: 'none',
+              minWidth: '32%',
+              px: 3,
+              py: 1
+            }}
+          >
+            Новый УМК
+          </Button> */}
+
         </Box>
 
         <Paper elevation={3} sx={{ p: 4, borderRadius: '16px', mb: 4 }}>

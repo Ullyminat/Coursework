@@ -210,7 +210,10 @@ const Gendocx = () => {
               >
                 {schemas.map((schema) => (
                   <MenuItem key={schema._id} value={schema._id}>
-                    {schema.image.split('/').pop()}
+                    <ListItemText 
+                      primary={schema.image.split('/').pop()}
+                      secondary={`Создан: ${new Date(schema.createdAt).toLocaleDateString("ru-RU")}`} 
+                    />
                   </MenuItem>
                 ))}
               </Select>

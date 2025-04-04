@@ -92,6 +92,63 @@ const useCabinetStore = create((set, get) => ({
     }
   },
 
+  fetchUMKs: async (page = 1, limit = 2) => {
+    set({ umksLoading: true, umksError: null });
+    try {
+      const response = await apiClient.get(`/umk?page=${page}&limit=${limit}`);
+      set({ 
+        umks: response.data.umks,
+        totalUmks: response.data.total,
+        currentPage: response.data.currentPage,
+        totalPages: response.data.pages,
+        umksLoading: false 
+      });
+    } catch (error) {
+      set({ 
+        umksError: error.response?.data?.error || error.message, 
+        umksLoading: false 
+      });
+    }
+  },
+
+  fetchSpecs: async (page = 1, limit = 2) => {
+    set({ specsLoading: true, specsError: null });
+    try {
+      const response = await apiClient.get(`/spec?page=${page}&limit=${limit}`);
+      set({ 
+        specs: response.data.specs,
+        totalSpecs: response.data.total,
+        currentPage: response.data.currentPage,
+        totalPages: response.data.pages,
+        specsLoading: false 
+      });
+    } catch (error) {
+      set({ 
+        specsError: error.response?.data?.error || error.message, 
+        specsLoading: false 
+      });
+    }
+  },
+
+  fetchSpecs: async (page = 1, limit = 2) => {
+    set({ cabinetsLoading: true, cabinetsError: null });
+    try {
+      const response = await apiClient.get(`/cabinet?page=${page}&limit=${limit}`);
+      set({ 
+        cabinets: response.data.cabinets,
+        totalSpecs: response.data.total,
+        currentPage: response.data.currentPage,
+        totalPages: response.data.pages,
+        cabinetsLoading: false 
+      });
+    } catch (error) {
+      set({ 
+        cabinetsError: error.response?.data?.error || error.message, 
+        cabinetsLoading: false 
+      });
+    }
+  },
+
   fetchUser: async (userId) => {
     set({ userDetailsLoading: true, userDetailsError: null });
     try {

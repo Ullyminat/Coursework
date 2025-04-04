@@ -11,6 +11,9 @@ import Gendocx from './pages/Gendocx';
 import Profile from './pages/Profile';
 import AdminRoute from './components/AdminRoute';
 import AdminPanel from './pages/AdminPanel';
+import AdminPanelCabinet from './pages/AdminPanelCabinet';
+import AdminPanelSpec from './pages/AdminPanelSpec';
+import AdminPanelUMK from './pages/AdminPanelUMK';
 
 function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
@@ -34,6 +37,9 @@ function App() {
 
         <Route element={<AdminRoute />}>
           <Route path="/admin/users" element={<AdminPanel />} />
+          <Route path="/admin/cabinets" element={<AdminPanelCabinet />} />
+          <Route path="/admin/specs" element={<AdminPanelSpec />} />
+          <Route path="/admin/umks" element={<AdminPanelUMK />} />
         </Route>
 
         {/* Fallback */}
