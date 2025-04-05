@@ -16,6 +16,7 @@ import CreateUMKModal from '../components/CreateUMKModal';
 import CreateUMKForm from '../components/CreateUMKForm';
 import EditUserCabinetsModal from '../components/EditUserCabinetsModal';
 import AdminNavigation from '../components/AdminNavigation';
+import DiamondIcon from '@mui/icons-material/Diamond';
 
 
 const AdminPanel = () => {
@@ -263,10 +264,10 @@ const [selectedUserCabinets, setSelectedUserCabinets] = useState([]);
                               value={user.role}
                               onChange={(e) => handleRoleChange(user._id, e.target.value)}
                               size="small"
-                              sx={{ minWidth: 120 }}
+                              sx={{ minWidth: 120, width: 150 }}
                             >
                               <MenuItem value="user">Пользователь</MenuItem>
-                              <MenuItem value="admin">Администратор</MenuItem>
+                              <MenuItem value="admin"><Box display="flex" alignItems="center" justifyContent="center" gap={0.4}><DiamondIcon sx={{ width: 19, color: 'orange' }} /><span>Повелитель</span></Box></MenuItem>
                             </Select>
                           </TableCell>
                           <TableCell>

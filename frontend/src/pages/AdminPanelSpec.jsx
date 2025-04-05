@@ -20,7 +20,7 @@ const AdminPanelSpec = () => {
     specsError,
     totalPages = 1,
     currentPage = 1,
-    fetchSpecs,
+    fetchSpecsAdmin,
     deleteSpec
   } = useCabinetStore();
 
@@ -28,14 +28,14 @@ const AdminPanelSpec = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedSpec, setSelectedSpec] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const limit = 10;
+  const limit = 4;
 
   useEffect(() => {
-    fetchSpecs(currentPage, limit);
-  }, [currentPage, fetchSpecs]);
+    fetchSpecsAdmin(currentPage, limit);
+  }, [currentPage, fetchSpecsAdmin, limit]);
 
   const handlePageChange = (_, value) => {
-    fetchSpecs(value, limit);
+    fetchSpecsAdmin(value, limit);
   };
 
   const handleDeleteClick = (spec) => {
@@ -48,7 +48,7 @@ const AdminPanelSpec = () => {
     try {
       if (selectedSpec) {
         await deleteSpec(selectedSpec._id);
-        fetchSpecs(currentPage, limit);
+        fetchSpecsAdmin(currentPage, limit);
       }
     } catch (error) {
       console.error('Ошибка при удалении:', error);
@@ -76,25 +76,25 @@ const AdminPanelSpec = () => {
         onClose={() => setCreateModalOpen(false)}
         onSpecCreated={() => {
           setCreateModalOpen(false);
-          fetchSpecs(currentPage, limit);
+          fetchSpecsAdmin(currentPage, limit);
         }}
         formComponent={<CreateSpecForm onSpecCreated={() => setCreateModalOpen(false)} />}
       />
 
       <Container component="main" maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 3}}>
-      <AdminNavigation/>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 3 }}>
+          <AdminNavigation />
           <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setCreateModalOpen(true)}
             sx={{
-                borderRadius: '8px',
-                textTransform: 'none',
-                minWidth: '100%',
-                px: 3,
-                py: 1
-              }}
+              borderRadius: '8px',
+              textTransform: 'none',
+              minWidth: '100%',
+              px: 3,
+              py: 1
+            }}
           >
             Новая специализация
           </Button>

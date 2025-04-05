@@ -17,7 +17,7 @@ const useCabinetStore = create((set, get) => ({
   userLoading: false,
   userError: null,
   allCabinets: [],
-
+  
   createUser: async (userData) => {
     set({ isLoading: true, error: null });
     try {
@@ -111,7 +111,7 @@ const useCabinetStore = create((set, get) => ({
     }
   },
 
-  fetchSpecs: async (page = 1, limit = 2) => {
+  fetchSpecsAdmin: async (page = 1, limit = 2) => {
     set({ specsLoading: true, specsError: null });
     try {
       const response = await apiClient.get(`/spec?page=${page}&limit=${limit}`);
@@ -130,20 +130,26 @@ const useCabinetStore = create((set, get) => ({
     }
   },
 
-  fetchSpecs: async (page = 1, limit = 2) => {
+  fetchCabinetsAdmin: async (page = 1, limit = 2) => {
     set({ cabinetsLoading: true, cabinetsError: null });
     try {
-      const response = await apiClient.get(`/cabinet?page=${page}&limit=${limit}`);
-      set({ 
+      const response = await apiClient.get(`/cabinet`, {
+        params: { page, limit }
+      });
+  
+      console.log('API Response:', response.data);
+  
+      set({
         cabinets: response.data.cabinets,
-        totalSpecs: response.data.total,
+        totalCabinets: response.data.total,
         currentPage: response.data.currentPage,
-        totalPages: response.data.pages,
-        cabinetsLoading: false 
+        totalPages: response.data.totalPages,
+        cabinetsLoading: false
       });
     } catch (error) {
+      console.error('Ошибка запроса:', error);
       set({ 
-        cabinetsError: error.response?.data?.error || error.message, 
+        cabinetsError: error.response?.data?.error || error.message,
         cabinetsLoading: false 
       });
     }

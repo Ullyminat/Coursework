@@ -15,12 +15,13 @@ import AdminNavigation from '../components/AdminNavigation';
 
 const AdminPanelCabinet = () => {
   const {
-    allCabinets = [],
+    cabinets = [],
     cabinetsLoading,
     cabinetsError,
-    totalPages = 1,
+    totalCabinets = 0,
     currentPage = 1,
-    fetchAllCabinets,
+    totalPages = 1,
+    fetchCabinetsAdmin,
     deleteCabinet
   } = useCabinetStore();
 
@@ -28,14 +29,27 @@ const AdminPanelCabinet = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedCabinet, setSelectedCabinet] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const limit = 10;
+  const limit = 2;
 
+  // Отладочные логи
   useEffect(() => {
-    fetchAllCabinets(currentPage, limit);
-  }, [currentPage, fetchAllCabinets]);
+    console.log('Состояние кабинетов:', {
+      cabinets,
+      currentPage,
+      totalPages,
+      totalCabinets,
+      loading: cabinetsLoading,
+      error: cabinetsError
+    });
+  }, [cabinets, currentPage, totalPages, cabinetsLoading, cabinetsError]);
+
+  // Загрузка данных при монтировании и изменении страницы
+  useEffect(() => {
+    fetchCabinetsAdmin(currentPage, limit);
+  }, [currentPage, fetchCabinetsAdmin]);
 
   const handlePageChange = (_, value) => {
-    fetchAllCabinets(value, limit);
+    fetchCabinetsAdmin(value, limit);
   };
 
   const handleDeleteClick = (cabinet) => {
@@ -48,14 +62,31 @@ const AdminPanelCabinet = () => {
     try {
       if (selectedCabinet) {
         await deleteCabinet(selectedCabinet._id);
-        fetchAllCabinets(currentPage, limit);
+        
+        // Пересчет общего количества страниц после удаления
+        const newTotal = totalCabinets - 1;
+        const newTotalPages = Math.ceil(newTotal / limit);
+        
+        if (cabinets.length === 1) {
+          // Если удалили последний элемент на странице
+          if (currentPage > 1) {
+            fetchCabinetsAdmin(currentPage - 1, limit);
+          } else {
+            fetchCabinetsAdmin(1, limit);
+          }
+        } else if (currentPage > newTotalPages) {
+          // Если текущая страница стала больше общего количества страниц
+          fetchCabinetsAdmin(newTotalPages, limit);
+        } else {
+          // Просто обновляем текущую страницу
+          fetchCabinetsAdmin(currentPage, limit);
+        }
       }
     } catch (error) {
-      console.error('Ошибка при удалении:', error);
+      console.error('Ошибка при удалении кабинета:', error);
     } finally {
       setIsDeleting(false);
       setDeleteModalOpen(false);
-      setSelectedCabinet(null);
     }
   };
 
@@ -76,25 +107,25 @@ const AdminPanelCabinet = () => {
         onClose={() => setCreateModalOpen(false)}
         onCabinetCreated={() => {
           setCreateModalOpen(false);
-          fetchAllCabinets(currentPage, limit);
+          fetchCabinetsAdmin(currentPage, limit);
         }}
         formComponent={<CreateCabinetForm onCabinetCreated={() => setCreateModalOpen(false)} />}
       />
 
       <Container component="main" maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 3}}>
-            <AdminNavigation/>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 3 }}>
+          <AdminNavigation />
           <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setCreateModalOpen(true)}
             sx={{
-                borderRadius: '8px',
-                textTransform: 'none',
-                minWidth: '100%',
-                px: 3,
-                py: 1
-              }}
+              borderRadius: '8px',
+              textTransform: 'none',
+              minWidth: '100%',
+              px: 3,
+              py: 1
+            }}
           >
             Новый кабинет
           </Button>
@@ -117,17 +148,21 @@ const AdminPanelCabinet = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 600 }}>Кабинет</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>№ Кабинета</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Название</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Год</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Площадь (м²)</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Действия</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {allCabinets.length > 0 ? (
-                      allCabinets.map((cabinet) => (
+                    {cabinets.length > 0 ? (
+                      cabinets.map((cabinet) => (
                         <TableRow key={cabinet._id} hover>
                           <TableCell>{cabinet.cabinet}</TableCell>
                           <TableCell>{cabinet.name}</TableCell>
+                          <TableCell>{cabinet.year}</TableCell>
+                          <TableCell>{cabinet.S}</TableCell>
                           <TableCell>
                             <IconButton color="primary">
                               <EditIcon />
@@ -144,7 +179,7 @@ const AdminPanelCabinet = () => {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
+                        <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                           <Typography color="text.secondary">
                             Нет данных о кабинетах
                           </Typography>
@@ -164,6 +199,8 @@ const AdminPanelCabinet = () => {
                     color="primary"
                     showFirstButton
                     showLastButton
+                    siblingCount={1}
+                    boundaryCount={1}
                   />
                 </Box>
               )}

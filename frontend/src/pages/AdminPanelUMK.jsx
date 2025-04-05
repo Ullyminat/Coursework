@@ -28,11 +28,11 @@ const AdminPanelUMK = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedUMK, setSelectedUMK] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const limit = 10;
+  const limit = 4;
 
   useEffect(() => {
     fetchUMKs(currentPage, limit);
-  }, [currentPage, fetchUMKs]);
+  }, [currentPage, fetchUMKs, limit]);
 
   const handlePageChange = (_, value) => {
     fetchUMKs(value, limit);
@@ -82,19 +82,19 @@ const AdminPanelUMK = () => {
       />
 
       <Container component="main" maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 3}}>
-      <AdminNavigation/>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 3 }}>
+          <AdminNavigation />
           <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setCreateModalOpen(true)}
             sx={{
-                borderRadius: '8px',
-                textTransform: 'none',
-                minWidth: '100%',
-                px: 3,
-                py: 1
-              }}
+              borderRadius: '8px',
+              textTransform: 'none',
+              minWidth: '100%',
+              px: 3,
+              py: 1
+            }}
           >
             Новый УМК
           </Button>

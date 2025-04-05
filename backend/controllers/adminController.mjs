@@ -78,16 +78,19 @@ export default class AdminController{
             const limit = parseInt(req.query.limit) || 10;
             const total = await Cabinet.countDocuments();
             
-            if(page < 1) throw new Error('Некорректный номер страницы');
+            if (page < 1) throw new Error('Некорректный номер страницы');
             
             const skip = (page - 1) * limit;
-            const pages = Math.ceil(total / limit);
+            const totalPages = Math.ceil(total / limit);
             
             const cabinets = await Cabinet.find().skip(skip).limit(limit);
-            return res.status(200).json({ total, currentPage: page, pages, limit, cabinets });
+            
+            return res.status(200).json({total,currentPage: page,totalPages,limit,cabinets:cabinets});
         } catch (error) {
-            console.log(error)
-            return res.status(500).json({ error: error.message });
+            console.error('Ошибка в getCabinets:', error);
+            return res.status(500).json({ 
+                error: error.message || 'Внутренняя ошибка сервера' 
+            });
         }
     }
 
