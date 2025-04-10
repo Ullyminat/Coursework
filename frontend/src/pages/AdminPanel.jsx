@@ -110,6 +110,7 @@ const [selectedUserCabinets, setSelectedUserCabinets] = useState([]);
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
+        type="пользователь"
         userName={selectedUser ? `${selectedUser.surname} ${selectedUser.name}` : ''}
         isLoading={isDeleting}
       />

@@ -240,4 +240,37 @@ export default class AdminController{
             return res.status(500).json({ error: error.message });
         }
     }
+
+    static async deleteCabinet(req, res) {
+        try {
+            const {id} = req.params;
+            await Cabinet.findByIdAndDelete(id);
+            return res.status(200).json({msg: 'Кабинет удалён'});
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async deleteSpec(req, res) {
+        try {
+            const {id} = req.params;
+            await Spec.findByIdAndDelete(id);
+            return res.status(200).json({msg: 'Специальность удалена'});
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async deleteUMK(req, res) {
+        try {
+            const {id} = req.params;
+            await UMK.findByIdAndDelete(id);
+            return res.status(200).json({msg: 'УМК удалён'});
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ error: error.message });
+        }
+    }
 }

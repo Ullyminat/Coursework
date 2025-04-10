@@ -29,7 +29,7 @@ const AdminPanelCabinet = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedCabinet, setSelectedCabinet] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const limit = 2;
+  const limit = 4;
 
   // Отладочные логи
   useEffect(() => {
@@ -46,7 +46,7 @@ const AdminPanelCabinet = () => {
   // Загрузка данных при монтировании и изменении страницы
   useEffect(() => {
     fetchCabinetsAdmin(currentPage, limit);
-  }, [currentPage, fetchCabinetsAdmin]);
+  }, [currentPage, fetchCabinetsAdmin, limit]);
 
   const handlePageChange = (_, value) => {
     fetchCabinetsAdmin(value, limit);
@@ -94,11 +94,12 @@ const AdminPanelCabinet = () => {
     <ThemeProvider theme={theme}>
       <Header />
       
-      <DeleteModal
+            <DeleteModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        itemName={selectedCabinet?.name || 'кабинет'}
+        itemName={selectedCabinet?.cabinet}
+        type="кабинет"
         isLoading={isDeleting}
       />
 
@@ -164,9 +165,6 @@ const AdminPanelCabinet = () => {
                           <TableCell>{cabinet.year}</TableCell>
                           <TableCell>{cabinet.S}</TableCell>
                           <TableCell>
-                            <IconButton color="primary">
-                              <EditIcon />
-                            </IconButton>
                             <IconButton 
                               color="error"
                               onClick={() => handleDeleteClick(cabinet)}

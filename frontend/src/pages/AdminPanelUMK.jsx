@@ -63,11 +63,12 @@ const AdminPanelUMK = () => {
     <ThemeProvider theme={theme}>
       <Header />
       
-      <DeleteModal
+            <DeleteModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        itemName={selectedUMK?.name || 'УМК'}
+        itemName={selectedUMK?.name}
+        type="умк"
         isLoading={isDeleting}
       />
 
@@ -129,9 +130,6 @@ const AdminPanelUMK = () => {
                           <TableCell>{umk.name}</TableCell>
                           <TableCell>{umk.year}</TableCell>
                           <TableCell>
-                            <IconButton color="primary">
-                              <EditIcon />
-                            </IconButton>
                             <IconButton 
                               color="error"
                               onClick={() => handleDeleteClick(umk)}

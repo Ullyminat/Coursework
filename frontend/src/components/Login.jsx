@@ -25,13 +25,13 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const login = useAuthStore((state) => state.login);
-  const navigate = useNavigate(); // Добавить в импорты
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await login(email, password);
-      navigate('/home'); // Перенаправление на Home после успешного входа
+      navigate('/home');
       setError('');
     } catch (error) {
       setError('Неверный email или пароль');

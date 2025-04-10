@@ -63,13 +63,15 @@ const AdminPanelSpec = () => {
     <ThemeProvider theme={theme}>
       <Header />
       
-      <DeleteModal
+            <DeleteModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        itemName={selectedSpec?.name || 'специализацию'}
+        itemName={selectedSpec?.name}
+        type="специальность"
         isLoading={isDeleting}
       />
+
 
       <CreateSpecModal
         open={createModalOpen}
@@ -96,7 +98,7 @@ const AdminPanelSpec = () => {
               py: 1
             }}
           >
-            Новая специализация
+            Новая специальность
           </Button>
         </Box>
 
@@ -127,9 +129,6 @@ const AdminPanelSpec = () => {
                         <TableRow key={spec._id} hover>
                           <TableCell>{spec.name}</TableCell>
                           <TableCell>
-                            <IconButton color="primary">
-                              <EditIcon />
-                            </IconButton>
                             <IconButton 
                               color="error"
                               onClick={() => handleDeleteClick(spec)}
@@ -144,7 +143,7 @@ const AdminPanelSpec = () => {
                       <TableRow>
                         <TableCell colSpan={2} align="center" sx={{ py: 4 }}>
                           <Typography color="text.secondary">
-                            Нет данных о специализациях
+                            Нет данных о специальностей
                           </Typography>
                         </TableCell>
                       </TableRow>

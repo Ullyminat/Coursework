@@ -52,10 +52,6 @@ export default class UserController{
             if (!newPassword || newPassword.trim().length === 0) {
                 return res.status(400).json({ msg: `Пароль не может быть пустым` });
             }
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()])[A-Za-z\d!@#$%^&*()]{4,15}$/;
-            if (!passwordRegex.test(newPassword)) {
-                return res.status(400).json({ msg: "Пароль должен содержать 4-15 символов и включать хотя бы одну строчную букву, одну заглавную букву, одну цифру и один специальный символ" });
-            }
             user.password = await bcrypt.hash(newPassword, 5);
             await user.save();
             return res.status(200).json({ msg: "Пароль успешно изменен!" });
@@ -64,6 +60,19 @@ export default class UserController{
             return res.status(500).json({ error: error.message });
         }
     }
+
+    static async changeFIO(req, res) {
+      try {
+          const userId = req.user._id;
+          const { name, surname, patronymic } = req.body;;
+          const user = await User.findByIdAndUpdate(userId,{name:name, surname: surname, patronymic: patronymic})
+          await user.save();
+          return res.status(200).json({ msg: "Всё ок" });
+      } catch (error) {
+          console.log(error);
+          return res.status(500).json({ error: error.message });
+      }
+  }
 
     static async logout(req, res) {
         try {

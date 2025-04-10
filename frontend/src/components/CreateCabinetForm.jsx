@@ -36,7 +36,7 @@ const CreateCabinetForm = ({ onCabinetCreated }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    // e.preventDefault();
     if (!validateForm()) return;
 
     setLoading(true);
@@ -44,7 +44,7 @@ const CreateCabinetForm = ({ onCabinetCreated }) => {
     
     try {
       await createCabinet({
-        cabinet: Number(formData.cabinet),
+        cabinet: String(formData.cabinet),
         year: Number(formData.year),
         S: Number(formData.S),
         name: formData.name

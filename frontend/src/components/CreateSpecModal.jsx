@@ -33,7 +33,7 @@ const CreateSpecModal = ({
       }}
     >
       <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>
-        Создание новой специализации
+        Создание новой специальности
       </DialogTitle>
       
       <DialogContent dividers>

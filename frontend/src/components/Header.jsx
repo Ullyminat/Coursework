@@ -46,7 +46,7 @@ const Header = () => {
           </Button>
 
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
+            {/* <Button
               component={Link}
               to="/editor"
               sx={{
@@ -60,7 +60,7 @@ const Header = () => {
               }}
             >
               Редактор
-            </Button>
+            </Button> */}
             
             <Button
               component={Link}

@@ -57,7 +57,7 @@ const AdminNavigation = () => {
           py: 1
         }}
       >
-        Специализации
+        Специальности
       </Button>
 
       <Button

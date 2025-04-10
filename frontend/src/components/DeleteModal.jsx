@@ -10,15 +10,30 @@ import {
   CircularProgress
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import deleteGif from '../assets/t3.gif'
+import deleteGif from '../assets/t3.gif';
 
 const DeleteModal = ({ 
-  open, 
-  onClose, 
-  onConfirm, 
-  userName,
+  open,
+  onClose,
+  onConfirm,
+  itemName,
+  type = 'элемент',
   isLoading = false
 }) => {
+  // Функция для правильного склонения слова
+  const getTypeDeclaration = () => {
+    const types = {
+      'кабинет': { preposition: 'кабинет', accusative: 'кабинет' },
+      'специальность': { preposition: 'специальность', accusative: 'специальность' },
+      'умк': { preposition: 'УМК', accusative: 'УМК' },
+      'пользователь': { preposition: 'пользователя', accusative: 'пользователя' }
+    };
+    
+    return types[type.toLowerCase()] || { preposition: type, accusative: type };
+  };
+
+  const { preposition, accusative } = getTypeDeclaration();
+
   return (
     <Dialog
       open={open}
@@ -33,7 +48,7 @@ const DeleteModal = ({
       }}
     >
       <DialogTitle sx={{ textAlign: 'center', fontWeight: 700 }}>
-        Подтверждение удаления
+        {`Подтверждение удаления ${preposition}`}
       </DialogTitle>
       
       <DialogContent dividers>
@@ -54,17 +69,24 @@ const DeleteModal = ({
             }} 
           />
           <Typography variant="body1" textAlign="center">
-            Вы уверены, что хотите удалить пользователя
+            {`Вы уверены, что хотите удалить ${accusative}`}
           </Typography>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 600,
-              color: 'primary.main'
-            }}
-          >
-            {userName}?
-          </Typography>
+          
+          {itemName && (
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 600,
+                color: 'primary.main',
+                textAlign: 'center',
+                maxWidth: '80%',
+                wordBreak: 'break-word'
+              }}
+            >
+              {`«${itemName}»?`}
+            </Typography>
+          )}
+          
           <Typography 
             variant="body2" 
             sx={{ 

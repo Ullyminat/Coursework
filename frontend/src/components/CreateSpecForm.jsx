@@ -15,9 +15,9 @@ const CreateSpecForm = ({ onSpecCreated }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    // e.preventDefault();
     if (!name.trim()) {
-      setError('Название специализации обязательно');
+      setError('Название специальности обязательно');
       return;
     }
 
@@ -29,7 +29,7 @@ const CreateSpecForm = ({ onSpecCreated }) => {
       setName('');
       onSpecCreated?.();
     } catch (err) {
-      setError(err.message || 'Ошибка при создании специализации');
+      setError(err.message || 'Ошибка при создании специальности');
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ const CreateSpecForm = ({ onSpecCreated }) => {
 
       <TextField
         fullWidth
-        label="Название специализации"
+        label="Название специальности"
         value={name}
         onChange={(e) => {
           setName(e.target.value);

@@ -130,24 +130,24 @@ const useCabinetStore = create((set, get) => ({
     }
   },
 
-  fetchCabinetsAdmin: async (page = 1, limit = 2) => {
+  fetchCabinetsAdmin: async (page = 1, limit = 4) => {
     set({ cabinetsLoading: true, cabinetsError: null });
     try {
-      const response = await apiClient.get(`/cabinet`, {
-        params: { page, limit }
-      });
-  
-      console.log('API Response:', response.data);
+      const allResponse = await apiClient.get('/cabinet');
+      const total = allResponse.data.length;
+      
+      const startIndex = (page - 1) * limit;
+      const paginatedData = allResponse.data.slice(startIndex, startIndex + limit);
   
       set({
-        cabinets: response.data.cabinets,
-        totalCabinets: response.data.total,
-        currentPage: response.data.currentPage,
-        totalPages: response.data.totalPages,
+        cabinets: paginatedData,
+        totalCabinets: total,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
         cabinetsLoading: false
       });
+  
     } catch (error) {
-      console.error('Ошибка запроса:', error);
       set({ 
         cabinetsError: error.response?.data?.error || error.message,
         cabinetsLoading: false 
@@ -437,6 +437,56 @@ addUserCabinets: async (userId, cabinets) => {
     } catch (error) {
         throw error.response?.data?.error || error.message;
     }
+},
+
+deleteCabinet: async (id) => {
+  set({ isLoading: true, error: null });
+  try {
+    await apiClient.delete(`/cabinet/${id}`);
+    set(state => ({
+      allCabinets: state.allCabinets.filter(c => c._id !== id),
+      cabinets: state.cabinets.filter(c => c._id !== id),
+    }));
+    set({ isLoading: false });
+    return { msg: 'Кабинет удалён' };
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || error.message;
+    set({ error: errorMessage, isLoading: false });
+    throw errorMessage;
+  }
+},
+
+deleteSpec: async (id) => {
+  set({ isLoading: true, error: null });
+  try {
+    await apiClient.delete(`/spec/${id}`);
+    set(state => ({
+      specs: state.specs.filter(spec => spec._id !== id),
+    }));
+    set({ isLoading: false });
+    return { msg: 'Специальность удалена' };
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || error.message;
+    set({ error: errorMessage, isLoading: false });
+    throw errorMessage;
+  }
+},
+
+deleteUMK: async (id) => {
+  set({ isLoading: true, error: null });
+  try {
+    await apiClient.delete(`/umk/${id}`);
+    set(state => ({
+      umks: state.umks.filter(umk => umk._id !== id),
+      umk: state.umk.filter(umk => umk._id !== id),
+    }));
+    set({ isLoading: false });
+    return { msg: 'УМК удалён' };
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || error.message;
+    set({ error: errorMessage, isLoading: false });
+    throw errorMessage;
+  }
 },
 }));
 

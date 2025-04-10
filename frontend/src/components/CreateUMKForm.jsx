@@ -18,7 +18,7 @@ const CreateUMKForm = ({ onUMKCreated }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    // e.preventDefault();
     if (!validateForm()) return;
 
     setLoading(true);
