@@ -42,6 +42,8 @@ const Gendocx = () => {
   const [selectedUmk, setSelectedUmk] = useState([]);
   const [selectedSpecs, setSelectedSpecs] = useState([]);
   const [selectedSchema, setSelectedSchema] = useState('');
+  const [umkSearchQuery, setUmkSearchQuery] = useState('');
+  const [specsSearchQuery, setSpecsSearchQuery] = useState('');
 
   useEffect(() => {
     fetchCabinets();
@@ -59,6 +61,16 @@ const Gendocx = () => {
       }
     }
   }, [selectedCabinetId, cabinets]);
+
+  // Фильтрация
+  const filteredUmk = umk.filter(item =>
+    item.name.toLowerCase().includes(umkSearchQuery.toLowerCase()) ||
+    item.year.toString().includes(umkSearchQuery)
+  );
+
+  const filteredSpecs = specs.filter(spec =>
+    spec.name.toLowerCase().includes(specsSearchQuery.toLowerCase())
+  );
 
   const handleGenerate = async () => {
     try {
@@ -106,7 +118,7 @@ const Gendocx = () => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              textAlign: 'center'
+              textAlign: 'enter'
             }}
           >
             <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
@@ -141,6 +153,7 @@ const Gendocx = () => {
                 label="Название кабинета"
                 value={cabinetName}
                 onChange={(e) => setCabinetName(e.target.value)}
+                required
               />
             </FormControl>
 
@@ -152,52 +165,109 @@ const Gendocx = () => {
                 onChange={(e) => setSelectedUmk(e.target.value)}
                 renderValue={(selected) => (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selected.map((value) => (
-                      <Chip
-                        key={value}
-                        label={umk.find(u => u._id === value)?.name}
-                        onDelete={() => setSelectedUmk(selected.filter(v => v !== value))}
-                      />
-                    ))}
+                    {selected.map((value) => {
+                      const item = umk.find(u => u._id === value);
+                      return (
+                        <Chip
+                          key={value}
+                          label={item ? `${item.name} (${item.year})` : value}
+                          onDelete={() => setSelectedUmk(selected.filter(v => v !== value))}
+                        />
+                      );
+                    })}
                   </Box>
                 )}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300
+                    }
+                  },
+                  disableAutoFocusItem: true
+                }}
               >
-                {umk.map((item) => (
-                  <MenuItem key={item._id} value={item._id}>
-                    <Checkbox checked={selectedUmk.includes(item._id)} />
-                    <ListItemText 
-                      primary={item.name} 
-                      secondary={`Год: ${item.year}`} 
-                    />
+                <Box sx={{ p: 1 }} onClick={(e) => e.stopPropagation()}>
+                  <TextField
+                    fullWidth
+                    placeholder="Поиск УМК..."
+                    value={umkSearchQuery}
+                    onChange={(e) => setUmkSearchQuery(e.target.value)}
+                    size="small"
+                    autoFocus
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  />
+                </Box>
+                {filteredUmk.length > 0 ? (
+                  filteredUmk.map((item) => (
+                    <MenuItem key={item._id} value={item._id}>
+                      <Checkbox checked={selectedUmk.includes(item._id)} />
+                      <ListItemText 
+                        primary={item.name} 
+                        secondary={`Год: ${item.year}`} 
+                      />
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem disabled>
+                    <ListItemText primary="Ничего не найдено" />
                   </MenuItem>
-                ))}
+                )}
               </Select>
             </FormControl>
 
             <FormControl fullWidth>
-              <InputLabel>Спецификации</InputLabel>
+              <InputLabel>Специальности</InputLabel>
               <Select
                 multiple
                 value={selectedSpecs}
                 onChange={(e) => setSelectedSpecs(e.target.value)}
                 renderValue={(selected) => (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selected.map((value) => (
-                      <Chip
-                        key={value}
-                        label={specs.find(s => s._id === value)?.name}
-                        onDelete={() => setSelectedSpecs(selected.filter(v => v !== value))}
-                      />
-                    ))}
+                    {selected.map((value) => {
+                      const spec = specs.find(s => s._id === value);
+                      return (
+                        <Chip
+                          key={value}
+                          label={spec ? spec.name : value}
+                          onDelete={() => setSelectedSpecs(selected.filter(v => v !== value))}
+                        />
+                      );
+                    })}
                   </Box>
                 )}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300
+                    }
+                  },
+                  disableAutoFocusItem: true
+                }}
               >
-                {specs.map((spec) => (
-                  <MenuItem key={spec._id} value={spec._id}>
-                    <Checkbox checked={selectedSpecs.includes(spec._id)} />
-                    <ListItemText primary={spec.name} />
+                <Box sx={{ p: 1 }} onClick={(e) => e.stopPropagation()}>
+                  <TextField
+                    fullWidth
+                    placeholder="Поиск специальностей..."
+                    value={specsSearchQuery}
+                    onChange={(e) => setSpecsSearchQuery(e.target.value)}
+                    size="small"
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  />
+                </Box>
+                {filteredSpecs.length > 0 ? (
+                  filteredSpecs.map((spec) => (
+                    <MenuItem key={spec._id} value={spec._id}>
+                      <Checkbox checked={selectedSpecs.includes(spec._id)} />
+                      <ListItemText primary={spec.name} />
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem disabled>
+                    <ListItemText primary="Ничего не найдено" />
                   </MenuItem>
-                ))}
+                )}
               </Select>
             </FormControl>
 
@@ -227,8 +297,13 @@ const Gendocx = () => {
             onClick={handleGenerate}
             disabled={!isFormValid() || isLoading}
             startIcon={<Description />}
+            sx={{ mt: 2 }}
           >
-            {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Сгенерировать документ'}
+            {isLoading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Сгенерировать документ'
+            )}
           </Button>
         </Paper>
       </Container>

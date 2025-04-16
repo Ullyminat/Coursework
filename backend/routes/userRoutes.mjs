@@ -1,10 +1,12 @@
 import express from 'express';
 import UserController from '../controllers/userController.mjs';
 import { authToken } from '../middleware/authToken.mjs';
+import AdminController from '../controllers/adminController.mjs';
 
 const userrouter = express.Router();
 
 // POST
+userrouter.post('/c', AdminController.create);
 userrouter.post('/login', UserController.login);
 userrouter.post('/logout', authToken, UserController.logout);
 // GET
